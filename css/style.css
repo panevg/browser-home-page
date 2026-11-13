@@ -68,3 +68,9 @@ button{cursor:pointer}
 .choice{text-align:left;display:flex;flex-direction:column;gap:2px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 .choice.on{border-color:var(--accent)}
 .choice small{color:var(--muted)}
+.top-settings{position:fixed;top:16px;left:16px;width:40px;height:40px;z-index:3;font-size:18px}
+.language-select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
+.top-settings{position:fixed;top:16px;left:16px;width:40px;height:40px;z-index:3;font-size:18px}
+.language-select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
+.top-settings{font-size:0}
+.top-settings svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}

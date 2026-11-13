@@ -12,12 +12,19 @@ const ENGINES = [
 ];
 const icon = h => `https://icons.duckduckgo.com/ip3/${h}.ico`;
 const uid = () => Math.random().toString(36).slice(2, 9);
-
 createApp({
   setup() {
     // ---- State (saved instantly on every change) ----
-    const state = reactive(Store.load({ engine: 0, bookmarks: [], widgets: [] }));
-    state.widgets = state.widgets.filter(w => Widgets.meta[w.type]); // drop unknown types
+    const saved = Store.load({ engine: 0, bookmarks: [], widgets: [] });
+    if (!saved.language) saved.language = (navigator.language || '').toLowerCase().startsWith('uk') ? 'uk' : 'en';
+    const state = reactive(saved);
+    const settings = reactive({ show: false });
+    const getLanguageCode = () => I18n.languageCode(state.language);
+    const t = key => I18n.app(getLanguageCode(), key);
+    document.documentElement.lang = getLanguageCode();
+    watch(() => state.language, v => { document.documentElement.lang = I18n.languageCode(v); document.title = t('pageTitle'); });
+    document.title = t('pageTitle');
+    state.widgets = (Array.isArray(state.widgets) ? state.widgets : []).filter(w => w && Widgets.meta[w.type]); // drop unknown types
     watch(state, s => Store.save(s), { deep: true, flush: 'sync' });
 
     // ---- Search + suggestions (DuckDuckGo autocomplete) ----
@@ -79,10 +86,11 @@ createApp({
       (window.requestIdleCallback || setTimeout)(() => state.widgets.forEach(w => loadWidget(w.type)));
     });
 
-    const catalog = Object.entries(Widgets.meta).map(([type, m]) => ({ type, ...m }));
-    const wm = reactive({ show: false, type: catalog[0].type, config: {} });
-    const wfields = computed(() => Widgets.meta[wm.type].fields);
-    const openWm = () => { wm.type = catalog[0].type; wm.config = {}; wm.show = true; };
+    const catalog = computed(() => Object.entries(Widgets.meta).map(([type, m]) => ({ type, name: t(m.nameKey), description: t(m.descriptionKey) })));
+    const firstWidgetType = () => catalog.value[0]?.type || Object.keys(Widgets.meta)[0] || '';
+    const wm = reactive({ show: false, type: firstWidgetType(), config: {} });
+    const wfields = computed(() => (Widgets.meta[wm.type]?.fields || []).map(f => ({ ...f, label: t(f.labelKey) })));
+    const openWm = () => { wm.type = firstWidgetType(); wm.config = {}; wm.show = true; };
     function addWidget() {
       if (wfields.value.some(f => f.required && !(wm.config[f.key] || '').trim())) return;
       state.widgets.push({ id: uid(), type: wm.type, config: { ...wm.config }, hidden: false });
@@ -107,12 +115,12 @@ createApp({
 
     // ---- Global events ----
     addEventListener('keydown', e => {
-      if (e.key === 'Escape') { bm.show = wm.show = menu.value = false; sugg.value = []; }
+      if (e.key === 'Escape') { bm.show = wm.show = settings.show = menu.value = false; sugg.value = []; }
       else if (e.key === '+' && !/INPUT|TEXTAREA/.test(document.activeElement.tagName) && !bm.show && !wm.show) { e.preventDefault(); openBm(); }
     });
     addEventListener('click', e => { if (!e.target.closest('.search-box')) { menu.value = false; sugg.value = []; } });
 
-    return { state, engines: ENGINES, engine, icon, q, sugg, sel, menu, onInput, move, go,
+    return { state, settings, t, getLanguageCode, engines: ENGINES, engine, icon, q, sugg, sel, menu, onInput, move, go,
       bm, openBm, addBookmark, delBm, wm, catalog, wfields, openWm, addWidget, delW, loaded, meta: Widgets.meta, dnd };
   },
 }).directive('focus', { mounted: el => el.focus() }).mount('#app');
