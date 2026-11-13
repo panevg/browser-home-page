@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Стартова сторінка</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app" v-cloak>
+  <button class="icon-btn top-add" title="Додати закладку (Shift +)" @click="openBm">+</button>
+
+  <!-- 1. Search -->
+  <section class="search">
+    <h1>Що шукаємо?</h1>
+    <div class="search-box">
+      <button class="engine-btn" :title="engine.name" @click="menu=!menu"><img :src="icon(engine.host)" alt=""><span>▾</span></button>
+      <input v-model="q" @input="onInput" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)" @keydown.enter="go"
+             :placeholder="'Пошук: '+engine.name" autofocus autocomplete="off" spellcheck="false">
+      <ul class="menu engines" v-if="menu">
+        <li v-for="(e,i) in engines" :key="e.name" :class="{on:i===state.engine}" @click="state.engine=i;menu=false"><img :src="icon(e.host)" alt="">{{e.name}}</li>
+      </ul>
+      <ul class="menu" v-if="sugg.length">
+        <li v-for="(s,i) in sugg" :key="s" :class="{on:i===sel}" @mousedown.prevent="q=s;go()">{{s}}</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 2. Bookmarks grid -->
+  <section class="grid">
+    <a class="tile" v-for="b in state.bookmarks" :key="b.id" :href="b.url" draggable="true" v-bind="dnd('bookmarks',state.bookmarks,b.id)">
+      <div class="ic"><img v-if="!b.bad" :src="icon(b.host)" alt="" @error="b.bad=true"><b v-else>{{b.title[0]}}</b></div>
+      <span>{{b.title}}</span>
+      <button class="x" title="Видалити" @click.prevent="delBm(b.id)">×</button>
+    </a>
+  </section>
+
+  <!-- 3. Widgets (only this part scrolls) -->
+  <section class="widgets">
+    <div class="wadd"><button class="icon-btn" title="Додати віджет" @click="openWm">+</button></div>
+    <div class="wrow" v-for="w in state.widgets" :key="w.id" v-bind="dnd('widgets',state.widgets,w.id)">
+      <span class="handle" draggable="true" title="Перетягнути">⠿</span>
+      <div class="widget" v-if="!w.hidden">
+        <component :is="loaded[w.type]" v-if="loaded[w.type]" :config="w.config"></component>
+        <div v-else class="skeleton"></div>
+      </div>
+      <button class="icon-btn" v-if="!w.hidden" title="Сховати" @click="w.hidden=true">−</button>
+      <div class="widget-hidden" v-else>
+        <div><b>{{meta[w.type].name}}</b><small>{{meta[w.type].summary(w.config)}}</small></div>
+        <button class="btn" @click="w.hidden=false">Показати</button>
+        <button class="btn danger" @click="delW(w.id)">Видалити</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bookmark modal -->
+  <div class="backdrop" v-if="bm.show" @mousedown.self="bm.show=false">
+    <form class="modal" @submit.prevent="addBookmark">
+      <h2>Нова закладка</h2>
+      <label>Адреса (URL)<input v-model="bm.url" v-focus placeholder="example.com" required></label>
+      <label>Назва <small>(необов’язково — візьму із заголовка сторінки)</small><input v-model="bm.title"></label>
+      <div class="actions"><button type="button" class="btn" @click="bm.show=false">Скасувати</button><button class="btn primary">Додати</button></div>
+    </form>
+  </div>
+
+  <!-- Widget modal -->
+  <div class="backdrop" v-if="wm.show" @mousedown.self="wm.show=false">
+    <form class="modal" @submit.prevent="addWidget">
+      <h2>Новий віджет</h2>
+      <div class="choices">
+        <button type="button" v-for="c in catalog" :key="c.type" class="choice" :class="{on:wm.type===c.type}" @click="wm.type=c.type;wm.config={}"><b>{{c.name}}</b><small>{{c.description}}</small></button>
+      </div>
+      <label v-for="f in wfields" :key="wm.type+f.key">{{f.label}}<input v-model="wm.config[f.key]" v-focus :placeholder="f.placeholder" :required="f.required"></label>
+      <div class="actions"><button type="button" class="btn" @click="wm.show=false">Скасувати</button><button class="btn primary">Додати</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- Pinned CDN build; for offline use download it into js/ and change the src -->
+<script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js"></script>
+<script src="js/store.js"></script>
+<script src="js/widgets/registry.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
