@@ -7,7 +7,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 # A new push to the same branch / PR cancels the older run.
@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [20, 22] # the range supported by package.json "engines"
+        node: [ 20, 22 ] # the range supported by package.json "engines"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -64,7 +64,7 @@ jobs:
   checks:
     name: All checks passed
     if: always()
-    needs: [test, build]
+    needs: [ test, build ]
     runs-on: ubuntu-latest
     steps:
       - name: Fail if any required job did not succeed

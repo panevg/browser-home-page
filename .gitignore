@@ -4,3 +4,9 @@ coverage/
 *.local
 .DS_Store
 npm-debug.log*
+
+.idea
+.vscode
+
+#
+auto-start.sh
