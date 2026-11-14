@@ -9,5 +9,6 @@ Guides for running and extending the start page. The project is a Vue 3 single-p
 | [Widgets](widgets.md) | Adding a widget, the widget API, built-in widgets |
 | [Localization](localization.md) | Adding a language and widget language packs |
 | [Customization](customization.md) | Search engines, theme, sizes, backup and reset |
+| [Testing and CI](testing.md) | Running the tests, what is covered, GitHub Actions, protecting `main` |
 
 Changes compared with the old no-build version: [../CHANGELOG.md](../CHANGELOG.md).

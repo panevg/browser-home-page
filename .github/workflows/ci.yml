@@ -1,0 +1,73 @@
+# Checks that must pass before a change reaches `main`.
+# Runs on every pull request and on every push to `main`.
+# To make it a real gate: Settings -> Branches -> Branch protection rule for `main` ->
+# "Require status checks to pass before merging" -> select "All checks passed". See docs/testing.md.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A new push to the same branch / PR cancels the older run.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22] # the range supported by package.json "engines"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - name: Unit tests with coverage
+        run: npm run coverage
+      - name: Upload coverage report
+        if: matrix.node == 22 && !cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 14
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Production build
+        run: npm run build
+      - name: Check the build output
+        run: test -s dist/index.html && ls dist/assets | grep -q '\.js$'
+
+  # One stable name to require in branch protection, so the matrix can change without touching the settings.
+  checks:
+    name: All checks passed
+    if: always()
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any required job did not succeed
+        run: |
+          echo "test: ${{ needs.test.result }}, build: ${{ needs.build.result }}"
+          [ "${{ needs.test.result }}" = "success" ] && [ "${{ needs.build.result }}" = "success" ]

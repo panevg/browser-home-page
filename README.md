@@ -32,6 +32,15 @@ Then set `http://localhost:2783` as your browser home page (Firefox: `about:pref
 
 > The port is fixed (`strictPort`) because `localStorage` belongs to the origin: a different address means an empty page. The built `dist/` must be served over HTTP; opening `dist/index.html` from disk does not work because browsers block ES modules on `file://`.
 
+## Tests
+
+```sh
+npm test            # unit tests (Vitest + jsdom)
+npm run coverage    # the same, with a coverage report
+```
+
+GitHub Actions (`.github/workflows/ci.yml`) runs the tests and the build on every pull request and every push to `main`. See [docs/testing.md](docs/testing.md), including how to make the checks mandatory for `main`.
+
 ## Data and privacy
 
 Bookmarks, widgets, the language and the selected search engine are stored in `localStorage` under the key `startpage:v1` and saved on every change. Short-lived network caches use keys starting with `startpage:cache:`. External services are called directly from the browser: suggestions and icons (DuckDuckGo); page titles and RSS feeds (directly, then through the local `/feed-proxy` of the Vite server, then through public CORS proxies as a last resort); pinned repositories (local `/gh-profile` proxy); and the widget APIs (GitHub, Open-Meteo, open.er-api.com).
@@ -40,7 +49,10 @@ Bookmarks, widgets, the language and the selected search engine are stored in `l
 
 ```
 index.html              entry page (loads src/main.js)
-vite.config.js          Vite config (alias @ -> src, fixed port 2783)
+vite.config.js          Vite config (alias @ -> src, fixed port 2783, tests)
+vite-plugins/           Vite plugin: /feed-proxy
+tests/                  unit tests
+.github/workflows/      CI
 package.json
 start.sh                build + serve helper
 src/
@@ -60,4 +72,4 @@ docs/                   documentation
 
 ## Documentation
 
-See [docs/](docs/README.md): [getting started](docs/getting-started.md), [architecture](docs/architecture.md), [widgets](docs/widgets.md), [localization](docs/localization.md), [customization](docs/customization.md). Notable changes from the previous no-build version are listed in [CHANGELOG.md](CHANGELOG.md).
+See [docs/](docs/README.md): [getting started](docs/getting-started.md), [architecture](docs/architecture.md), [widgets](docs/widgets.md), [localization](docs/localization.md), [customization](docs/customization.md), [testing and CI](docs/testing.md). Notable changes from the previous no-build version are listed in [CHANGELOG.md](CHANGELOG.md).
