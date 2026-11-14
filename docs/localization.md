@@ -1,6 +1,6 @@
 # Localization
 
-Two kinds of texts exist: application texts (`js/locales/`) and widget texts (`js/widgets/<type>/lang/`). Both use plain scripts that register strings, and both are loaded on demand.
+Two kinds of texts exist: application texts (`src/locales/`) and widget texts (`src/widgets/<type>/lang/`). Both are ES modules whose **default export** is an object of strings, and both are loaded on demand (one small chunk per file).
 
 ## Language selection
 
@@ -11,25 +11,25 @@ Two kinds of texts exist: application texts (`js/locales/`) and widget texts (`j
 
 ## Add a language
 
-1. Register it in `js/locales/index.js`. The name is shown as written, without a flag:
+1. Register it in `src/locales/index.js`. The name is shown as written, without a flag:
 
    ```js
-   I18n.addLang('de', 'Deutsch', 'js/locales/de.js');
+   { code: 'de', name: 'Deutsch', load: () => import('./de.js') },
    ```
 
-2. Copy `js/locales/en-GB.js` to `js/locales/de.js`, change the code in `I18n.define('de', { ... })` and translate the values. Keep the keys.
-3. For each widget, copy `js/widgets/<type>/lang/en-GB.js` to `de.js`, change the code in `I18n.defineWidget('<type>', 'de', { ... })` and translate it.
+2. Copy `src/locales/en-GB.js` to `src/locales/de.js` and translate the values. Keep the keys.
+3. For each widget, copy `src/widgets/<type>/lang/en-GB.js` to `de.js` and translate it. Nothing needs to be registered: packs are discovered by their path.
 
 The language appears in the settings dialog automatically.
 
 ## Strings with parameters
 
-Use `{name}` placeholders and pass an object: `I18n.t('key', { name: 'x' })` in the app or `I18n.wt(type, 'key', { name: 'x' })` in widgets. Unknown placeholders are left as they are.
+Use `{name}` placeholders and pass an object: `t('key', { name: 'x' })` in the application or `wt(type, 'key', { name: 'x' })` in widgets (both from `@/i18n`). Unknown placeholders are left as they are.
 
 ## Widget packs
 
-A widget declares the folder of its packs in the registry (`lang`). Packs are loaded after the page has loaded, for the current language and for `en-GB`, and again when the language changes. A widget pack must contain `name`, `description` and one key for every field `labelKey`. Everything else is up to the widget.
+Packs are loaded after the page has loaded, for the current language and for `en-GB`, and again when the language changes. The "new widget" dialog also makes sure they are loaded. A widget pack must contain `name`, `description` and one key for every field `labelKey`. Everything else is up to the widget.
 
 ## Application keys
 
-`pageTitle`, `settings`, `addBookmark`, `searchTitle`, `search`, `delete`, `addWidget`, `drag`, `hide`, `show`, `newBookmark`, `url`, `name`, `optionalTitle`, `cancel`, `add`, `newWidget`, `language`, `done`.
+`pageTitle`, `settings`, `addBookmark`, `searchTitle`, `search`, `delete`, `addWidget`, `drag`, `hide`, `show`, `newBookmark`, `url`, `name`, `optionalTitle`, `cancel`, `add`, `newWidget`, `language`, `done`, `invalidUrl`, `widgetLoadError`.

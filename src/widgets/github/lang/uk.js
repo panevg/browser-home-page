@@ -1,0 +1,14 @@
+export default {
+  name: 'Закріплені репозиторії GitHub', description: 'Теплова мапа активності та закріплені репозиторії', userLabel: 'Ім’я користувача GitHub',
+  last90Days: 'подій за останні 90 днів', loading: 'Завантаження даних GitHub…', loadError: 'Не вдалося завантажити дані GitHub. Спробуйте пізніше.',
+  userNotFound: 'Користувача GitHub не знайдено', apiError: 'Помилка GitHub API', noPinned: 'У цього користувача немає публічних закріплених репозиторіїв.',
+  "recent": "Закріплені репозиторії недоступні — остання активність",
+  "ev.PushEvent": "Push",
+  "ev.PullRequestEvent": "Pull request",
+  "ev.IssuesEvent": "Issue",
+  "ev.IssueCommentEvent": "Коментар",
+  "ev.CreateEvent": "Створено",
+  "ev.WatchEvent": "Зірка",
+  "ev.ForkEvent": "Форк",
+  "ev.DeleteEvent": "Видалено",
+};

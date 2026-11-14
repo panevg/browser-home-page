@@ -1,75 +1,91 @@
 # Widgets
 
-A widget is a Vue component with its own script, optional CSS and language packs. Adding one never requires touching `app.js` or `index.html`.
+A widget is a folder in `src/widgets/` with a Vue single-file component, a small metadata file and language packs. Adding one never requires touching `App.vue`, `registry.js` or any other shared file: the registry discovers it automatically.
 
-## The three parts
-
-1. **A registry entry** in `js/widgets/registry.js`.
-2. **A component file** that calls `Widgets.define(type, component, css)`.
-3. **Language packs** in `js/widgets/<type>/lang/<code>.js`.
-
-### 1. Registry entry
-
-```js
-hello: W('hello',
-  [{ key: 'who', labelKey: 'whoLabel', placeholder: 'world', required: true }], // input fields of the "add widget" dialog
-  c => c.who),                                                                  // short text for the collapsed placeholder
+```
+src/widgets/hello/
+  index.js              metadata
+  HelloWidget.vue       the component (+ its CSS)
+  lang/en-GB.js         language packs
+  lang/uk.js
 ```
 
-`W(name, fields, summary)` expects the files `js/widgets/<name>.js` and `js/widgets/<name>/lang/`. A field has `key` (stored in `config`), `labelKey` (a key in the language pack), `placeholder` and `required`. Use `[]` for widgets without settings.
+The folder name is the widget **type** (stored in the saved state, so do not rename it later).
 
-### 2. Component file
+## 1. `index.js`: metadata
 
 ```js
-// js/widgets/hello.js
-const css = `.hello{height:100%;display:grid;place-items:center;font:500 28px var(--serif)}`;
+export default {
+  order: 90,                                                  // position in the picker (default 100)
+  fields: [{ key: 'who', labelKey: 'whoLabel', placeholder: 'world', required: true }], // inputs of the "new widget" dialog
+  summary: c => c.who,                                        // short text of the collapsed (hidden) widget
+  prepare: c => ({ ...c, who: c.who.toUpperCase() }),         // optional: adjust the config before it is saved
+  component: () => import('./HelloWidget.vue'),               // lazy: loaded when first rendered
+};
+```
 
-Widgets.define('hello', {
-  props: ['config'],
-  template: `<div class="hello">{{tr('greeting', { who: config.who })}}</div>`,
-  methods: { tr: (key, params) => I18n.wt('hello', key, params) },
-}, css);
+A field has `key` (stored in `config`), `labelKey` (a key in the language pack), `placeholder` and `required`. Use `fields: []` for widgets without settings. Empty optional values are not stored.
+
+## 2. Component
+
+```vue
+<!-- src/widgets/hello/HelloWidget.vue -->
+<script setup>
+import { wt } from '@/i18n';
+
+const props = defineProps({ config: { type: Object, required: true } });
+const tr = (key, params) => wt('hello', key, params);
+</script>
+
+<template>
+  <div class="hello">{{ tr('greeting', { who: config.who }) }}</div>
+</template>
+
+<style>
+.hello{height:100%;display:grid;place-items:center;font:500 28px var(--serif)}
+</style>
 ```
 
 Notes:
 
-- The component receives its fields as the `config` prop.
-- The templates are strings compiled in the browser, so no build tools are needed.
-- Prefix your CSS classes (`.hello`, `.wx-`, `.gh-`) because the CSS is global.
+- The component receives its settings as the `config` prop.
+- Each widget is its own ES module, so top-level names (`const css`, `const fmt`, ...) never clash with other widgets.
+- The `<style>` block is global and ends up in the widget's own CSS chunk. Prefix your classes (`.hello`, `.wx-`, `.gh-`) or use `<style scoped>`.
+- The widget root must fill the box (`height:100%`).
 
-### 3. Language packs
+## 3. Language packs
 
 ```js
-// js/widgets/hello/lang/en-GB.js
-I18n.defineWidget('hello', 'en-GB', {
-  name: 'Hello',                         // required: shown in the picker
-  description: 'Greets someone',         // required
-  whoLabel: 'Who to greet',              // one key per field labelKey
+// src/widgets/hello/lang/en-GB.js
+export default {
+  name: 'Hello',                  // required: shown in the picker
+  description: 'Greets someone',  // required
+  whoLabel: 'Who to greet',       // one key per field labelKey
   greeting: 'Hello, {who}!',
-});
+};
 ```
 
-Create the same file for every language (`uk.js`, ...). `en-GB` is the fallback. A missing pack file is not an error.
+Create the same file for every language (`uk.js`, ...). `en-GB` is the fallback, and a missing pack file is not an error.
 
 ## Widget API cheat sheet
 
 | Need | How |
 | --- | --- |
-| Settings entered by the user | `this.config.<key>` |
-| Persistent data | Mutate `this.config` (`this.config.items.push(...)`). It is saved instantly. Initialise defaults in `created()` (`this.config.items ||= []`) and never replace `this.config` itself. |
-| Translations | `I18n.wt(type, key, params)`; `{name}` placeholders. Reads the current language reactively. |
-| Relative time | `I18n.ago(date)` |
-| Date and number formatting | `Intl.*` with `I18n.data.lang` |
-| Timers | Start in `created()`, clear in `beforeUnmount()` |
-| Network data | `fetch` the API directly if it allows CORS, otherwise use `https://api.allorigins.win/raw?url=`. Cache in `localStorage` with a timestamp. |
+| Settings entered by the user | `props.config.<key>` (`config.<key>` in the template) |
+| Persistent data | Mutate `props.config` (`props.config.items.push(...)`). It is saved instantly. Set defaults at the top of `<script setup>` (`props.config.items ||= []`) and never replace `config` itself. |
+| Translations | `wt(type, key, params)` from `@/i18n`; `{name}` placeholders. Reads the current language reactively. |
+| Relative time | `ago(date)` from `@/i18n` (returns `''` for an invalid date) |
+| Date and number formatting | `Intl.*` with `data.lang` (`import { data } from '@/i18n'`) |
+| Timers | Create them in `<script setup>`, clear them in `onBeforeUnmount` |
+| Network data | `fetch` the API directly if it allows CORS, otherwise use `proxied(url)` from `@/utils/net`. Cache with `cached(key, ttlMs, fetcher, isValid?)` from `@/utils/cache`. |
 | Scrolling list | Add `class="scroll"` for the thin themed scrollbar, and make the list `flex:1; min-height:0; overflow-y:auto` |
 | Links from external data | Open with `target="_blank" rel="noopener"` and accept only `http(s)` URLs |
 
+`cached()` stores the result in `localStorage` (`startpage:cache:<key>`) and never throws because of a full storage. Pass `isValid` to skip caching empty results.
+
 ## Layout and theme
 
-The widget box is 60% of the screen width and one third of its height on desktop, and full width on phones. The component fills it (`height:100%`). Use the theme variables so dark mode works: `--bg`, `--card`, `--text`, `--muted`, `--line`, `--soft`, `--accent`, `--accent-d`, `--serif`, `--sans`.
-
-On narrow screens add a rule for your layout, for example `@media(max-width:620px){ ... }` inside the widget CSS.
+The widget box is 60% of the screen width and one third of its height on desktop, and full width on phones. The component fills it. Use the theme variables so dark mode works: `--bg`, `--card`, `--text`, `--muted`, `--line`, `--soft`, `--accent`, `--accent-d`, `--serif`, `--sans`. On narrow screens add a rule such as `@media(max-width:620px){ ... }` to your widget CSS.
 
 ## Built-in widgets
 
@@ -86,4 +102,4 @@ On narrow screens add a rule for your layout, for example `@media(max-width:620p
 
 ### Cactus rules
 
-The cactus grows with real time, even while the page is closed. Its growth is `hours since planting + bonus`. The three actions (water, sunlight, fertiliser) can each be used once per hour and add a bonus of 0.25, 0.25 and 0.5 hours of growth. Using every action every hour at most doubles the speed. Stages start at 0, 1, 24, 72, 168 and 336 growth hours. Arms appear at 72 and 168 hours, and a flower at 336. State is stored in `config.planted`, `config.bonus` and `config.last`. The constants are at the top of `js/widgets/cactus.js`.
+The cactus grows with real time, even while the page is closed. Its growth is `hours since planting + bonus`. The three actions (water, sunlight, fertiliser) can each be used once per hour and add a bonus of 0.25, 0.25 and 0.5 hours of growth. Using every action every hour at most doubles the speed. Stages start at 0, 1, 24, 72, 168 and 336 growth hours. Arms appear at 72 and 168 hours, and a flower at 336. State is stored in `config.planted`, `config.bonus` and `config.last`. The constants are at the top of `src/widgets/cactus/CactusWidget.vue`.
