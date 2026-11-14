@@ -4,37 +4,18 @@ import { ref } from 'vue';
 import { ago, wt } from '@/i18n';
 import { cached } from '@/utils/cache';
 import { fetchText } from '@/utils/net';
+import { isFeed, parseFeed } from '@/utils/feed';
 
 const props = defineProps({ config: { type: Object, required: true } });
 const tr = (k, p) => wt('news', k, p);
 
 const items = ref(null), err = ref('');
 
-function parseDoc(text) {
-  const doc = new DOMParser().parseFromString(text.replace(/^\uFEFF/, '').trim(), 'text/xml');
-  if (doc.querySelector('parsererror')) throw new Error('not a valid feed');
-  return doc;
-}
-const isFeed = text => { try { return parseDoc(text).querySelector('item, entry') !== null; } catch { return false; } };
-
-function parse(text) {
-  const doc = parseDoc(text);
-  return [...doc.querySelectorAll('item, entry')].map(n => {
-    const q = s => n.querySelector(s);
-    const l = q('link[rel="alternate"], link:not([rel])') || q('link'); // Atom entries may carry several <link>
-    return {
-      title: (q('title')?.textContent || '').trim(),
-      url: l?.getAttribute('href') || l?.textContent.trim() || '',
-      date: q('pubDate, published, updated')?.textContent || '',
-    };
-  }).filter(x => x.title && /^https?:\/\//i.test(x.url)).slice(0, 30); // only http(s) links from external data
-}
-
 async function load() {
   const feed = (props.config.feed || '').trim();
   try {
     const list = await cached('news:' + feed, 6e5, async () => {
-      return parse(await fetchText(feed, { accept: isFeed }));
+      return parseFeed(await fetchText(feed, { accept: isFeed }));
     }, l => l.length > 0);
     if (!list.length) { err.value = 'empty'; return; }
     items.value = list;

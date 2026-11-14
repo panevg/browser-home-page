@@ -62,8 +62,8 @@ While a chunk loads, `WidgetSkeleton.vue` is shown; if it fails to load, `Widget
 | --- | --- |
 | `ac.duckduckgo.com` | Search suggestions (through the Vite proxy `/ddg-ac`) |
 | `icons.duckduckgo.com` | Bookmark and engine icons |
-| `github.com` | Pinned repositories (through the Vite proxy `/gh-profile`, `allorigins.win` as fallback) |
-| `api.allorigins.win` | Public CORS proxy for page titles and RSS feeds (third-party, can be unavailable) |
+| `github.com` | Pinned repositories (through the Vite proxy `/gh-profile`, public proxy as fallback) |
+| `api.allorigins.win`, `corsproxy.io`, `api.codetabs.com` | Public CORS proxies, the last resort for page titles and RSS feeds (third-party, can be unavailable) |
 | `api.github.com` | GitHub widget events |
 | `open-meteo.com` | Weather widget (geocoding + forecast) |
 | `open.er-api.com` | Exchange rates widget |
@@ -72,7 +72,7 @@ Widgets cache responses in `localStorage` under `startpage:cache:*` (10 minutes 
 
 ## Same-origin proxies
 
-Some services send no CORS headers, so the browser would block direct requests. `vite.config.js` defines `server.proxy` and `preview.proxy` (`/ddg-ac` -> `ac.duckduckgo.com`, `/gh-profile` -> `github.com`); the code calls them with relative URLs. They exist only in `npm run dev` and `npm run preview`. If you host `dist/` on a plain static server, configure equivalent rewrites there; otherwise search suggestions are simply not shown and GitHub pinned repositories fall back to the public proxy.
+Some services send no CORS headers, so the browser would block direct requests. `vite.config.js` defines `server.proxy` and `preview.proxy` (`/ddg-ac` -> `ac.duckduckgo.com`, `/gh-profile` -> `github.com`); the code calls them with relative URLs. The same plugin (`vite-plugins/feed-proxy.js`) adds `/feed-proxy?url=...`, a generic fetcher for RSS feeds and page titles: it answers only requests addressed to `localhost`, only for `http(s)` targets, and caps the response at 3 MB. `utils/net.js` (`fetchText`) tries a direct request, then `/feed-proxy`, then public proxies. All of this exists only in `npm run dev` and `npm run preview`. If you host `dist/` on a plain static server, configure equivalent rewrites there; otherwise search suggestions are simply not shown and GitHub pinned repositories fall back to the public proxy.
 
 ## Build output
 

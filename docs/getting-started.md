@@ -36,7 +36,10 @@ Your data is kept in `localStorage` under the same key (`startpage:v1`) and the 
 
 ```
 index.html                entry page: stylesheet + <script type="module" src="/src/main.js">
-vite.config.js            Vue plugin, alias @ -> src, port 2783, relative base
+vite.config.js            Vue plugin, alias @ -> src, port 2783, relative base, test settings
+vite-plugins/             feed-proxy.js: same-origin fetcher for feeds and page titles
+tests/                    unit tests (Vitest), mirrors src/
+.github/workflows/ci.yml  tests + build on every pull request
 package.json
 start.sh
 src/
@@ -62,7 +65,7 @@ src/
     <type>/index.js       widget metadata (fields, summary, lazy component)
     <type>/<Name>Widget.vue
     <type>/lang/<code>.js
-  utils/                  cache.js, net.js, url.js, misc.js
+  utils/                  cache.js, net.js, feed.js, url.js, misc.js
   directives/focus.js     v-focus
   styles/style.css        theme variables, layout, mobile rules
 docs/                     this documentation

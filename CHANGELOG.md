@@ -6,8 +6,14 @@
 
 - **News widget did not load.** It depended on a single public CORS proxy (`allorigins.win`) that is often down or rate-limited. Feeds (and bookmark page titles) are now fetched by `fetchText()` in `src/utils/net.js`: directly, then through the new same-origin `/feed-proxy` (Vite dev/preview), then through several public proxies. A response is accepted only if it really is a feed, so a proxy returning an error page no longer breaks the widget. A UTF-8 BOM before the XML is tolerated.
 
+### Added
+
+- Unit tests (Vitest, jsdom, `@vue/test-utils`) for utilities, state, i18n (including a translation-completeness guard), composables, widgets, dialogs and the `/feed-proxy` plugin: `npm test`, `npm run coverage`.
+- GitHub Actions workflow `.github/workflows/ci.yml`: tests (Node 20 and 22) and build on every pull request and push to `main`, with one "All checks passed" job to require in branch protection. See `docs/testing.md`.
+
 ### Changed
 
+- RSS parsing moved to `src/utils/feed.js` and the proxy plugin to `vite-plugins/feed-proxy.js` so they can be tested on their own (no behaviour change).
 - The bookmarks grid uses the shared thin site scrollbar (`.scroll`) instead of the browser default.
 - Emoji in the cactus widget (actions and hidden-widget summary) were replaced with SVG icons in the style of the settings icon. The weather widget keeps its emoji.
 
