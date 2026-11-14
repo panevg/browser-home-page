@@ -1,7 +1,4 @@
-// Shared localisation API. Widget packs are loaded from each widget's own locale namespace.
-window.I18n = {
-  languageCode(language) { return window.LocalePacks?.[language] ? language : 'en'; },
-  app(language, key) { return window.LocalePacks?.[this.languageCode(language)]?.app?.[key] ?? key; },
-  widget(language, widget, key) { return window.LocalePacks?.[this.languageCode(language)]?.widgets?.[widget]?.[key] ?? key; },
-  pack(language, widget) { return window.LocalePacks?.[this.languageCode(language)]?.widgets?.[widget] ?? {}; }
-};
+// Language list. To add a language: add a line here and create js/locales/<code>.js (copy en-GB.js).
+// Names are shown as written here (no flags). Widgets add their own packs, see widgets/registry.js.
+I18n.addLang('en-GB', 'English (United Kingdom)', 'js/locales/en-GB.js');
+I18n.addLang('uk', 'Українська', 'js/locales/uk.js');
