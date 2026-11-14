@@ -3,6 +3,6 @@
 export const FALLBACK = 'en-GB';
 
 export const languages = [
-  { code: 'en-GB', name: 'English (United Kingdom)', load: () => import('./en-GB.js') },
-  { code: 'uk', name: 'Українська', load: () => import('./uk.js') },
+	{code: 'en-GB', name: 'English (United Kingdom)', load: () => import('./en-GB.js')},
+	{code: 'uk', name: 'Українська', load: () => import('./uk.js')}
 ];

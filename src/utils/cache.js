@@ -4,14 +4,18 @@
 const PREFIX = 'startpage:cache:';
 
 export async function cached(key, ttl, fetcher, isValid = () => true) {
-  const k = PREFIX + key;
-  try {
-    const c = JSON.parse(localStorage.getItem(k));
-    if (c && Date.now() - c.t < ttl) return c.d;
-  } catch {}
-  const d = await fetcher();
-  if (isValid(d)) {
-    try { localStorage.setItem(k, JSON.stringify({ t: Date.now(), d })); } catch {}
-  }
-  return d;
+	const k = PREFIX + key;
+	try {
+		const c = JSON.parse(localStorage.getItem(k));
+		if (c && Date.now() - c.t < ttl) return c.d;
+	} catch {
+	}
+	const d = await fetcher();
+	if (isValid(d)) {
+		try {
+			localStorage.setItem(k, JSON.stringify({t: Date.now(), d}));
+		} catch {
+		}
+	}
+	return d;
 }

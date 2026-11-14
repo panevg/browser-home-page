@@ -6,7 +6,7 @@ defineEmits(['close', 'submit']);
 <template>
   <div class="backdrop" @mousedown.self="$emit('close')">
     <form class="modal" @submit.prevent="$emit('submit')">
-      <slot />
+      <slot/>
     </form>
   </div>
 </template>
