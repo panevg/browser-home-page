@@ -3,8 +3,8 @@
 @media(prefers-color-scheme:dark){:root{--bg:#262624;--card:#30302e;--text:#faf9f5;--muted:#a3a29a;--line:#44443f;--soft:#1f1e1d}}
 *{box-sizing:border-box}
 [v-cloak]{display:none}
-body{margin:0;height:100vh;overflow:hidden;background:var(--bg);color:var(--text);font:15px var(--sans)}
-#app{height:100vh;display:flex;flex-direction:column;align-items:center}
+body{margin:0;height:100vh;height:100dvh;overflow:hidden;background:var(--bg);color:var(--text);font:15px var(--sans)}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column;align-items:center}
 button,input{font:inherit;color:inherit}
 button{cursor:pointer}
 
@@ -44,7 +44,8 @@ button{cursor:pointer}
 .tile:hover .x{display:block}
 
 /* 3. Widgets */
-.widgets{flex:1;min-height:0;overflow-y:auto;width:100%;margin-top:20px;padding-bottom:40px}
+.widgets{flex:1;min-height:0;overflow-y:auto;width:100%;margin-top:20px;padding-bottom:40px;scrollbar-width:none}
+.widgets::-webkit-scrollbar{display:none}
 .wadd{display:flex;justify-content:center;margin-bottom:16px}
 .wrow{display:grid;grid-template-columns:32px 60vw 32px;gap:8px;justify-content:center;align-items:start;margin-bottom:16px}
 .handle{text-align:center;color:var(--muted);cursor:grab;user-select:none;padding-top:6px;font-size:18px}
@@ -64,13 +65,35 @@ button{cursor:pointer}
 .modal input{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);outline:0}
 .modal input:focus{border-color:var(--accent)}
 .actions{display:flex;justify-content:flex-end;gap:8px}
-.choices{display:flex;flex-direction:column;gap:8px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .choice{text-align:left;display:flex;flex-direction:column;gap:2px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
 .choice.on{border-color:var(--accent)}
 .choice small{color:var(--muted)}
-.top-settings{position:fixed;top:16px;left:16px;width:40px;height:40px;z-index:3;font-size:18px}
-.language-select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
-.top-settings{position:fixed;top:16px;left:16px;width:40px;height:40px;z-index:3;font-size:18px}
-.language-select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
-.top-settings{font-size:0}
+.top-settings{position:fixed;top:16px;left:16px;width:40px;height:40px;z-index:3}
 .top-settings svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+.language-select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font:inherit}
+
+/* Shared thin scrollbar for scrollable lists inside widgets (class="scroll") */
+.scroll{--sb:color-mix(in srgb,var(--muted) 30%,transparent);overscroll-behavior:contain}
+.scroll::-webkit-scrollbar{width:10px}
+.scroll::-webkit-scrollbar-track{background:transparent}
+.scroll::-webkit-scrollbar-thumb{background:var(--sb);border:3px solid transparent;border-radius:10px;background-clip:content-box}
+.scroll::-webkit-scrollbar-thumb:hover{background:color-mix(in srgb,var(--muted) 55%,transparent);background-clip:content-box}
+@supports not selector(::-webkit-scrollbar){.scroll{scrollbar-width:thin;scrollbar-color:var(--sb) transparent}}
+
+/* Touch + mobile */
+.handle{touch-action:none}
+.tile{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+@media(hover:none){.tile .x{display:block}}
+@media(max-width:700px){
+  .top-add,.top-settings{top:10px}
+  .search{margin-top:68px}.search h1{font-size:26px;margin-bottom:14px}
+  .search-box{width:94vw}.search-box input{font-size:16px}
+  .grid{grid-template-columns:repeat(auto-fill,76px);width:96vw;max-height:26dvh;margin-top:16px}
+  .tile{padding:8px 2px}.tile .ic{width:56px;height:56px}
+  .widgets{margin-top:12px}
+  .wrow{grid-template-columns:28px minmax(0,1fr) 30px;gap:4px;width:100%;padding:0 6px;justify-content:stretch}
+  .widget{height:clamp(240px,44dvh,420px)}
+  .widget-hidden{flex-wrap:wrap}
+  .modal{padding:18px}.modal input,.modal select{font-size:16px}.choices{grid-template-columns:1fr}
+}

@@ -1,0 +1,20 @@
+I18n.defineWidget('weather', 'en-GB', {
+  "name": "Clock & weather",
+  "description": "Local time and weather for a chosen place",
+  "locationLabel": "Location (city)",
+  "loading": "Loading weather…",
+  "loadError": "Could not load weather. Please try again later.",
+  "notFound": "Place not found",
+  "feels": "feels like",
+  "wind": "wind",
+  "kmh": "km/h",
+  "wmo.clear": "Clear",
+  "wmo.partly": "Partly cloudy",
+  "wmo.overcast": "Overcast",
+  "wmo.fog": "Fog",
+  "wmo.drizzle": "Drizzle",
+  "wmo.rain": "Rain",
+  "wmo.snow": "Snow",
+  "wmo.showers": "Showers",
+  "wmo.storm": "Thunderstorm"
+});

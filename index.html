@@ -8,7 +8,7 @@
 </head>
 <body>
 <div id="app" v-cloak>
-  <button class="icon-btn top-settings" :title="t('settings')" @click="settings.show=true" aria-label="Settings" :aria-label="t('settings')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 2.94-.08-.02a1.7 1.7 0 0 0-1.78.55l-.05.07h-3.4l-.03-.08a1.7 1.7 0 0 0-1.52-1.1 1.7 1.7 0 0 0-1.52 1.1l-.03.08H6.29l-.05-.07a1.7 1.7 0 0 0-1.78-.55l-.08.02-1.7-2.94.06-.06A1.7 1.7 0 0 0 3.08 15l-.08-.04v-3.4l.08-.04a1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.7-2.94.08.02a1.7 1.7 0 0 0 1.78-.55l.05-.07h3.4l.03.08a1.7 1.7 0 0 0 1.52 1.1 1.7 1.7 0 0 0 1.52-1.1l.03-.08h3.4l.05.07a1.7 1.7 0 0 0 1.78.55l.08-.02 1.7 2.94-.06.06A1.7 1.7 0 0 0 19.4 11.5l.08.04v3.4l-.08.06Z"/></svg></button>
+  <button class="icon-btn top-settings" :title="t('settings')" @click="settings.show=true" :aria-label="t('settings')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.25a3.75 3.75 0 1 0 0 7.5 3.75 3.75 0 0 0 0-7.5Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 2.94-.08-.02a1.7 1.7 0 0 0-1.78.55l-.05.07h-3.4l-.03-.08a1.7 1.7 0 0 0-1.52-1.1 1.7 1.7 0 0 0-1.52 1.1l-.03.08H6.29l-.05-.07a1.7 1.7 0 0 0-1.78-.55l-.08.02-1.7-2.94.06-.06A1.7 1.7 0 0 0 3.08 15l-.08-.04v-3.4l.08-.04a1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.7-2.94.08.02a1.7 1.7 0 0 0 1.78-.55l.05-.07h3.4l.03.08a1.7 1.7 0 0 0 1.52 1.1 1.7 1.7 0 0 0 1.52-1.1l.03-.08h3.4l.05.07a1.7 1.7 0 0 0 1.78.55l.08-.02 1.7 2.94-.06.06A1.7 1.7 0 0 0 19.4 11.5l.08.04v3.4l-.08.06Z"/></svg></button>
   <button class="icon-btn top-add" :title="t('addBookmark')" @click="openBm">+</button>
 
   <!-- 1. Search -->
@@ -38,20 +38,20 @@
 
   <!-- 3. Widgets (only this part scrolls) -->
   <section class="widgets">
-    <div class="wadd"><button class="icon-btn" :title="t('addWidget')" @click="openWm">+</button></div>
     <div class="wrow" v-for="w in state.widgets" :key="w.id" v-bind="dnd('widgets',state.widgets,w.id)">
       <span class="handle" draggable="true" :title="t('drag')">⠿</span>
       <div class="widget" v-if="!w.hidden">
-        <component :is="loaded[w.type]" v-if="loaded[w.type]" :config="w.config" :locale="getLanguageCode()"></component>
+        <component :is="loaded[w.type]" v-if="loaded[w.type]" :config="w.config"></component>
         <div v-else class="skeleton"></div>
       </div>
       <button class="icon-btn" v-if="!w.hidden" :title="t('hide')" @click="w.hidden=true">−</button>
       <div class="widget-hidden" v-else>
-        <div><b>{{meta[w.type].name}}</b><small>{{meta[w.type].summary(w.config)}}</small></div>
+        <div><b>{{wt(w.type,'name')}}</b><small>{{meta[w.type].summary(w.config)}}</small></div>
         <button class="btn" @click="w.hidden=false">{{t('show')}}</button>
         <button class="btn danger" @click="delW(w.id)">{{t('delete')}}</button>
       </div>
     </div>
+    <div class="wadd"><button class="icon-btn" :title="t('addWidget')" @click="openWm">+</button></div>
   </section>
 
   <!-- Settings modal -->
@@ -59,9 +59,8 @@
     <form class="modal" @submit.prevent="settings.show=false">
       <h2>{{t('settings')}}</h2>
       <label>{{t('language')}}
-        <select v-model="state.language" class="language-select">
-          <option value="en-GB">English (United Kingdom)</option>
-          <option value="uk">Українська</option>
+        <select class="language-select" :value="state.lang" @change="setLang($event.target.value)">
+          <option v-for="l in langs" :key="l.code" :value="l.code">{{l.name}}</option>
         </select>
       </label>
       <div class="actions"><button class="btn primary">{{t('done')}}</button></div>
@@ -93,10 +92,9 @@
 
 <!-- Pinned CDN build; for offline use download it into js/ and change the src -->
 <script src="https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.global.prod.js"></script>
-<script src="js/locales/en.js"></script>
-<script src="js/locales/uk.js"></script>
-<script src="js/locales/index.js"></script>
 <script src="js/store.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/locales/index.js"></script>
 <script src="js/widgets/registry.js"></script>
 <script src="js/app.js"></script>
 </body>
