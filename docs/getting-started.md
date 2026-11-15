@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-The dev server runs at `http://localhost:2783` with hot module replacement. The port is fixed and `strictPort` is on: if it is busy, Vite stops instead of choosing another port. This matters because `localStorage` (your bookmarks and widgets) belongs to the origin, so a different port would show an empty page.
+The dev server runs at `http://localhost:2784` with hot module replacement. The port is fixed and `strictPort` is on: if it is busy, Vite stops instead of choosing another port. This matters because `localStorage` (your bookmarks and widgets) belongs to the origin, so a different port would show an empty page.
 
 ## Production build
 

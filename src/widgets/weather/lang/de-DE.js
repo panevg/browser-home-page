@@ -1,0 +1,20 @@
+export default {
+	"name": "Uhr und Wetter",
+	"description": "Ortszeit und Wetter am gewählten Ort",
+	"locationLabel": "Ort (Stadt)",
+	"loading": "Wetterdaten werden geladen…",
+	"loadError": "Die Wetterdaten konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+	"notFound": "Ort nicht gefunden",
+	"feels": "fühlt sich an wie",
+	"wind": "Wind",
+	"kmh": "km/s",
+	"wmo.clear": "Klar",
+	"wmo.partly": "Teils bewölkt",
+	"wmo.overcast": "Bedeckt",
+	"wmo.fog": "Nebel",
+	"wmo.drizzle": "Nieselregen",
+	"wmo.rain": "Regen",
+	"wmo.snow": "Schnee",
+	"wmo.showers": "Duschen",
+	"wmo.storm": "Gewitter"
+};
