@@ -18,7 +18,7 @@ export default defineConfig({
 	resolve: {
 		alias: {'@': fileURLToPath(new URL('./src', import.meta.url))}
 	},
-	server: {port: 2783, strictPort: true, proxy},
+	server: {port: 2784, strictPort: true, proxy},
 	preview: {port: 2783, strictPort: true, proxy},
 	// Unit tests (`npm test`). The environment is jsdom (DOM, localStorage); files that need Node say so with
 	// a `// @vitest-environment node` comment on top.

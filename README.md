@@ -24,7 +24,7 @@ Requires **Node.js 20.19+** (or 22.12+).
 
 ```sh
 npm install
-npm run dev        # development server with hot reload: http://localhost:2783
+npm run dev        # development server with hot reload: http://localhost:2784
 ```
 
 To use it day to day, build once and serve the result:

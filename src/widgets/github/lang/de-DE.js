@@ -1,0 +1,20 @@
+export default {
+	name: 'Angeheftete GitHub-Repositories',
+	description: 'Aktivitäts-Heatmap und angeheftete Repositories',
+	userLabel: 'GitHub Benutzername',
+	last90Days: 'Ereignisse der letzten 90 Tage',
+	loading: 'GitHub Daten werden geladen…',
+	loadError: 'Die GitHub-Daten konnten nicht geladen werden. Bitte versuchen Sie es später erneut.',
+	userNotFound: 'GitHub Benutzer nicht gefunden',
+	apiError: 'GitHub API Fehler',
+	noPinned: 'Dieser Benutzer hat keine öffentlich angehefteten Repositories.',
+	"recent": "Angeheftete Repositories nicht verfügbar – aktuelle Aktivitäten",
+	"ev.PushEvent": "Push",
+	"ev.PullRequestEvent": "Pull request",
+	"ev.IssuesEvent": "Issue",
+	"ev.IssueCommentEvent": "Kommentar",
+	"ev.CreateEvent": "Erstellt",
+	"ev.WatchEvent": "Mit Sternchen",
+	"ev.ForkEvent": "Gegabelt",
+	"ev.DeleteEvent": "Gelöscht"
+};

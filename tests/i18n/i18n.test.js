@@ -35,7 +35,7 @@ describe('detect', () => {
 
 	it('uses English (UK) when nothing matches', async () => {
 		const {detect, FALLBACK} = await fresh();
-		setLanguages(['fr', 'de']);
+		setLanguages(['some', 'lang']);
 		expect(detect()).toBe(FALLBACK);
 	});
 });
