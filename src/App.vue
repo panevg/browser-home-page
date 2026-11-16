@@ -9,8 +9,9 @@ import WidgetList from '@/components/WidgetList.vue';
 import SettingsModal from '@/components/SettingsModal.vue';
 import BookmarkModal from '@/components/BookmarkModal.vue';
 import WidgetModal from '@/components/WidgetModal.vue';
+import ModulesModal from '@/components/ModulesModal.vue';
 
-// Only one dialog can be open at a time: null | 'settings' | 'bookmark' | 'widget'
+// Only one dialog can be open at a time: null | 'settings' | 'bookmark' | 'widget' | 'modules'
 const modal = ref(null);
 
 watchEffect(() => {
@@ -53,6 +54,12 @@ onUnmounted(() => removeEventListener('keydown', onKey));
   </button>
   <button :title="t('addBookmark')" class="icon-btn top-add" type="button" @click="modal = 'bookmark'">+</button>
 
+  <button :aria-label="t('mod.open')" :title="t('mod.open')" class="icon-btn bottom-modules" type="button" @click="modal = 'modules'">
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM16.5 13v7M13 16.5h7"/>
+    </svg>
+  </button>
+
   <SearchBox/>
   <BookmarkGrid/>
   <WidgetList @add="modal = 'widget'"/>
@@ -60,4 +67,5 @@ onUnmounted(() => removeEventListener('keydown', onKey));
   <SettingsModal v-if="modal === 'settings'" @close="modal = null"/>
   <BookmarkModal v-if="modal === 'bookmark'" @add="onAddBookmark" @close="modal = null"/>
   <WidgetModal v-if="modal === 'widget'" @add="onAddWidget" @close="modal = null"/>
+  <ModulesModal v-if="modal === 'modules'" @close="modal = null"/>
 </template>

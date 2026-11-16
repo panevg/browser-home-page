@@ -12,6 +12,9 @@ its `localStorage`.
 - **Widgets:** loaded lazily after the page opens (each widget is its own code chunk). They can be hidden, removed and
   rearranged. Built in: GitHub (activity and pinned repositories), clock and weather, calendar, to-do list, notes,
   exchange rates, news (RSS/Atom) and a virtual cactus. Any number of widgets, of any mix of types, can be on the page.
+- **Modules:** panels driven by your own server over WebSocket. The server sends an abstract UI (text, buttons, inputs, ...),
+  the page draws it, and actions go back as messages. Added with the bottom-left button; see [docs/modules.md](docs/modules.md)
+  and the demo server (`npm run example:module`).
 - **Drag and drop:** move bookmarks and widgets with the mouse or a touch screen (drag widgets by the ⠿ handle,
   bookmarks after a long press).
 - **Languages:** English (United Kingdom) and Ukrainian. The language is picked from your system settings and the list
@@ -69,6 +72,7 @@ tests/                  unit tests
 .github/workflows/      CI
 package.json
 start.sh                build + serve helper
+examples/               demo module server (no dependencies)
 src/
   main.js               loads the language, mounts the app
   App.vue               layout, global shortcuts, dialogs
@@ -78,6 +82,7 @@ src/
   config/engines.js     search engines
   i18n/                 translation core
   locales/              application languages
+  modules/              module protocol, WebSocket connection, per-module runtime
   widgets/              registry.js + one folder per widget
   utils/ directives/    helpers (cache, URL parsing, v-focus, ...)
   styles/style.css      theme and layout
@@ -86,5 +91,5 @@ docs/                   documentation
 
 ## Documentation
 
-See [docs/](docs/README.md): [getting started](docs/getting-started.md), [architecture](docs/architecture.md), [widgets](docs/widgets.md), [localization](docs/localization.md), [customization](docs/customization.md), [testing and CI](docs/testing.md).
+See [docs/](docs/README.md): [getting started](docs/getting-started.md), [architecture](docs/architecture.md), [widgets](docs/widgets.md), [modules](docs/modules.md), [localization](docs/localization.md), [customization](docs/customization.md), [testing and CI](docs/testing.md).
 Notable changes from the previous no-build version are listed in [CHANGELOG.md](CHANGELOG.md).

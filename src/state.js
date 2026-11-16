@@ -1,9 +1,11 @@
 // The whole user state: one reactive object, written to localStorage synchronously on every change.
-//   { engine: number, lang: string|null, settings: { search, ui }, bookmarks: [{ id, url, host, title }], widgets: [{ id, type, config, hidden }] }
+//   { engine: number, lang: string|null, settings: { search, ui, modules }, bookmarks: [{ id, url, host, title }], widgets: [{ id, type, config, hidden }],
+//     modules: [{ id, name, url, hidden, autoConnect, size, values }] }
 // Widgets keep their own data inside `config`, so it is saved the same way.
 import {reactive, watch} from 'vue';
 import {widgetMeta} from '@/widgets/registry';
 import {parseHttpUrl} from '@/utils/url';
+import {isId, parseWsUrl} from '@/modules/protocol';
 import {uid} from '@/utils/misc';
 import {normalizeSettings} from '@/config/settings';
 
@@ -26,6 +28,12 @@ function write(s) {
 	}
 }
 
+// Saved input values of a module (only inputs marked `persist`): small primitives under valid ids.
+function cleanValues(v) {
+	if (!isObj(v)) return {};
+	return Object.fromEntries(Object.entries(v).filter(([k, x]) => isId(k) && (typeof x === 'boolean' || (typeof x === 'number' && Number.isFinite(x)) || (typeof x === 'string' && x.length <= 4000))).slice(0, 50));
+}
+
 // Makes any stored value safe to use: wrong types are repaired, broken or unknown entries are dropped.
 function normalize(raw) {
 	const s = isObj(raw) ? raw : {};
@@ -45,12 +53,21 @@ function normalize(raw) {
 			hidden: !!w.hidden
 		}));
 
+	const modules = (Array.isArray(s.modules) ? s.modules : []).flatMap(m => {
+		const p = isObj(m) && typeof m.url === 'string' ? parseWsUrl(m.url) : null; // only ws:// and wss://
+		return p ? [{
+			id: String(m.id || uid()), name: String(m.name || p.host).slice(0, 60), url: p.url, hidden: !!m.hidden,
+			autoConnect: m.autoConnect !== false, size: ['s', 'm', 'l'].includes(m.size) ? m.size : 'm', values: cleanValues(m.values)
+		}] : [];
+	});
+
 	return {
 		engine: Number.isInteger(s.engine) && s.engine >= 0 ? s.engine : 0,
 		lang: typeof lang === 'string' ? lang : null,
 		settings: normalizeSettings(s.settings),
 		bookmarks,
-		widgets
+		widgets,
+		modules
 	};
 }
 

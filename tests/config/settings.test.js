@@ -26,7 +26,8 @@ describe('normalizeSettings', () => {
 				tileSize: 's',
 				tileLabels: false,
 				bookmarksOpenIn: 'blank'
-			}
+			},
+			modules: {enabled: false, reconnect: false, reconnectDelay: 30, requestTimeout: 5}
 		};
 		expect(normalizeSettings(custom)).toEqual(custom);
 	});

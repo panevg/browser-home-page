@@ -23,6 +23,12 @@ export const DEFAULTS = {
 		tileSize: 'm',         // bookmark size: 's' | 'm' | 'l'
 		tileLabels: true,      // bookmark titles under the icons
 		bookmarksOpenIn: 'self'
+	},
+	modules: {
+		enabled: true,         // connect to module servers at all
+		reconnect: true,       // reconnect automatically after the connection drops
+		reconnectDelay: 5,     // seconds before the first retry (doubles on every failure, up to 16x)
+		requestTimeout: 10     // seconds to wait for the first ui, for replies to requests and for `wait: ui`
 	}
 };
 
@@ -33,7 +39,9 @@ export const OPTIONS = {
 	searchWidth: ['s', 'm', 'l'],
 	searchShape: ['pill', 'round', 'square'],
 	tileSize: ['s', 'm', 'l'],
-	bookmarksOpenIn: ['self', 'blank']
+	bookmarksOpenIn: ['self', 'blank'],
+	reconnectDelay: [2, 5, 10, 30],
+	requestTimeout: [5, 10, 30]
 };
 
 // Accent colours: [normal, hover]. All keep white button text readable.
