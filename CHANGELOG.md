@@ -12,6 +12,14 @@
 
 ### Added
 
+- **Search history.** Searches are remembered for 30 days (at most 300) and used to improve the dropdown, which now has the
+  priority bookmarks, then history (instant, works offline), then DuckDuckGo suggestions (a suggestion already in the history
+  is not repeated). History is ranked by how it matches and by how often and how recently it was used. Security: text that
+  looks like a secret or personal data (addresses, e-mails, `password:`/`token=` assignments, keys, JWTs, IBANs, long digit
+  strings, long mixed letter-digit words) is never stored and such old entries are removed on load; invisible and
+  direction-override characters are stripped; history has its own `localStorage` key so backups of the state do not contain
+  it; it is rendered as plain text; other tabs stay in sync. Controls: a setting (on by default; switching it off deletes the
+  history), a **Clear** button with the number of saved searches, a **×** on each history row and Shift+Delete. See `docs/history.md`.
 - **Farm widget.** A small canvas game: coins arrive every hour, you build pens and buy animals (chicken, pig, sheep, cow),
   they are fully grown after 10 minutes and can be sold for a small amount. Selling a quota of animals raises the level,
   which raises the hourly income; every 5 levels all prices rise, and the first animal bought at the raised price is a

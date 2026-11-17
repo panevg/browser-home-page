@@ -15,6 +15,9 @@ its `localStorage`.
 - **Modules:** panels driven by your own server over WebSocket. The server sends an abstract UI (text, buttons, inputs, ...),
   the page draws it, and actions go back as messages. Added with the bottom-left button; see [docs/modules.md](docs/modules.md)
   and the demo server (`npm run example:module`).
+- **Search history:** searches are remembered for 30 days and offered while you type, in the order bookmarks, history,
+  suggestions. Secrets and personal data are never stored, history is kept apart from the page state, and it can be
+  cleared or switched off (which deletes it). See [docs/history.md](docs/history.md).
 - **Drag and drop:** move bookmarks and widgets with the mouse or a touch screen (drag widgets by the ⠿ handle,
   bookmarks after a long press).
 - **Languages:** English (United Kingdom) and Ukrainian. The language is picked from your system settings and the list

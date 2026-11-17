@@ -94,5 +94,9 @@ export default {
 	"set.enabled": "Увімкнути модулі",
 	"set.reconnect": "Перепідключатися автоматично",
 	"set.reconnectDelay": "Затримка перепідключення (секунди)",
-	"set.requestTimeout": "Таймаут відповіді сервера (секунди)"
+	"set.requestTimeout": "Таймаут відповіді сервера (секунди)",
+	"set.history": "Пам’ятати пошукові запити 30 днів",
+	"set.clearHistory": "Історія пошуку: збережено {n}",
+	"historyClear": "Очистити",
+	"forget": "Видалити з історії"
 };

@@ -5,11 +5,13 @@ import {state} from '@/state';
 import {DEFAULTS} from '@/config/settings';
 import SearchBox from '@/components/SearchBox.vue';
 import SettingsModal from '@/components/SettingsModal.vue';
+import {clearHistory, history, record} from '@/history';
 
 beforeAll(async () => {
 	await use('en-GB');
 });
 beforeEach(() => {
+	clearHistory();
 	state.engine = 0;
 	Object.assign(state.settings.search, DEFAULTS.search);
 	Object.assign(state.settings.ui, DEFAULTS.ui);
@@ -196,3 +198,160 @@ describe('SearchBox: bookmark suggestions', () => {
 		expect(w.find('.menu li.bm').exists()).toBe(false);
 	});
 });
+
+describe('SearchBox: search history', () => {
+	beforeEach(() => {
+		state.bookmarks.splice(0, state.bookmarks.length, {id: 'a', url: 'https://github.com/', host: 'github.com', title: 'GitHub'});
+	});
+	afterEach(() => state.bookmarks.splice(0, state.bookmarks.length));
+
+	const rows = w => w.findAll('.menu:not(.engines) li');
+	const kind = li => (li.classes().includes('bm') ? 'bookmark' : li.classes().includes('hist') ? 'history' : 'suggestion');
+
+	it('orders the dropdown: bookmarks, then history, then suggestions, without repeating a suggestion that is in the history', async () => {
+		vi.useFakeTimers();
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue({json: async () => ['github', ['github login', 'GitHub Actions', 'github pages']]}));
+		record('github actions');
+		record('unrelated');
+		const w = mount(SearchBox);
+		await w.find('input').setValue('github');
+		await vi.advanceTimersByTimeAsync(200);
+		await flushPromises();
+		expect(rows(w).map(li => [kind(li), li.text().replace(/\s*github\.com$/, '').replace(/×$/, '')])).toEqual([
+			['bookmark', 'GitHub'], ['history', 'github actions'], ['suggestion', 'github login'], ['suggestion', 'github pages']
+		]);
+	});
+
+	it('shows history at once and without the network, even when suggestions are switched off', async () => {
+		const f = vi.fn();
+		vi.stubGlobal('fetch', f);
+		state.settings.search.suggestions = false;
+		record('rust book');
+		const w = mount(SearchBox);
+		await w.find('input').setValue('rus');
+		expect(rows(w).map(kind)).toEqual(['history']);
+		expect(rows(w)[0].text()).toContain('rust book');
+		expect(f).not.toHaveBeenCalled();
+	});
+
+	it('remembers a search when it is made', async () => {
+		vi.spyOn(window, 'open').mockReturnValue(null);
+		state.settings.search.openIn = 'blank';
+		await search('best pizza');
+		expect(history.map(h => h.q)).toEqual(['best pizza']);
+		await search('best pizza');
+		expect(history[0].n).toBe(2);
+	});
+
+	it('does not remember opened addresses, bookmarks, sensitive text, or anything when switched off', async () => {
+		vi.spyOn(window, 'open').mockReturnValue(null);
+		state.settings.search.openIn = 'blank';
+		await search('https://example.com/private?token=1'); // opened directly
+		const w = mount(SearchBox);
+		state.settings.search.suggestions = false;
+		await w.find('input').setValue('git');
+		await w.find('input').trigger('keydown.down');
+		await w.find('input').trigger('keydown.enter'); // opens the bookmark
+		await search('password: hunter2');
+		await search('me@example.com');
+		expect(history).toEqual([]);
+
+		state.settings.search.history = false;
+		await search('private thing');
+		expect(history).toEqual([]);
+	});
+
+	it('does not show history when it is switched off', async () => {
+		record('rust book');
+		state.settings.search.history = false;
+		state.settings.search.suggestions = false;
+		const w = mount(SearchBox);
+		await w.find('input').setValue('rus');
+		expect(rows(w)).toHaveLength(0);
+	});
+
+	it('searches again when a history row is chosen', async () => {
+		const open = vi.spyOn(window, 'open').mockReturnValue(null);
+		state.settings.search.openIn = 'blank';
+		state.settings.search.suggestions = false;
+		record('rust book');
+		const w = mount(SearchBox);
+		await w.find('input').setValue('rus');
+		await w.find('.menu li.hist').trigger('mousedown');
+		expect(open).toHaveBeenCalledWith('https://duckduckgo.com/?q=rust%20book', '_blank', 'noopener');
+		expect(history[0].n).toBe(2);
+	});
+
+	it('removes one entry with its cross, without searching', async () => {
+		const open = vi.spyOn(window, 'open').mockReturnValue(null);
+		state.settings.search.suggestions = false;
+		record('rust book');
+		record('rust lang');
+		const w = mount(SearchBox);
+		await w.find('input').setValue('rus');
+		const row = rows(w).find(li => li.text().includes('rust book'));
+		await row.find('.hist-x').trigger('mousedown');
+		expect(history.map(h => h.q)).toEqual(['rust lang']);
+		expect(open).not.toHaveBeenCalled();
+		expect(rows(w).map(li => li.text())).toEqual([expect.stringContaining('rust lang')]);
+	});
+
+	it('removes the selected entry with Shift+Delete, but not with Delete alone', async () => {
+		state.settings.search.suggestions = false;
+		record('rust book');
+		const w = mount(SearchBox);
+		await w.find('input').setValue('rus');
+		await w.find('input').trigger('keydown.down');
+		await w.find('input').trigger('keydown', {key: 'Delete'});
+		expect(history).toHaveLength(1);
+		await w.find('input').trigger('keydown', {key: 'Delete', shiftKey: true});
+		expect(history).toHaveLength(0);
+	});
+
+	it('shows history text as plain text, never as markup', async () => {
+		state.settings.search.suggestions = false;
+		record('<img src=x onerror=alert(1)> cats');
+		const w = mount(SearchBox);
+		await w.find('input').setValue('cats');
+		expect(w.find('.menu img[src="x"]').exists()).toBe(false);
+		expect(rows(w)[0].text()).toContain('<img src=x onerror=alert(1)> cats');
+	});
+});
+
+describe('SettingsModal: search history', () => {
+	const show = async () => {
+		const w = mount(SettingsModal);
+		await flushPromises();
+		return w;
+	};
+	const row = (w, label) => w.findAll('.srow').find(r => r.find('span').text() === label);
+
+	it('has a switch that is on by default; turning it off deletes the saved history', async () => {
+		record('a');
+		record('b');
+		const w = await show();
+		expect(state.settings.search.history).toBe(true);
+		await row(w, 'Remember searches for 30 days').find('.switch').trigger('click');
+		await flushPromises();
+		expect(state.settings.search.history).toBe(false);
+		expect(history).toEqual([]);
+	});
+
+	it('shows how many searches are saved, and a button that clears them', async () => {
+		record('a');
+		record('b');
+		const w = await show();
+		const r = row(w, 'Search history: 2 saved');
+		expect(r.find('button').attributes('disabled')).toBeUndefined();
+		await r.find('button').trigger('click');
+		expect(history).toEqual([]);
+		expect(row(w, 'Search history: 0 saved').find('button').attributes('disabled')).toBeDefined();
+	});
+
+	it('greys the clear button out while the history is off', async () => {
+		state.settings.search.history = false;
+		const w = await show();
+		expect(row(w, 'Search history: 0 saved').classes()).toContain('off');
+	});
+});
+

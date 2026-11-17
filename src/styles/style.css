@@ -1135,3 +1135,65 @@ button {
         height: clamp(300px, 62dvh, 560px)
     }
 }
+
+/* Search history rows in the dropdown */
+.menu li.hist .hist-ic {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.8;
+    stroke-linecap: round
+}
+
+.menu li.hist .t {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap
+}
+
+.hist-x {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0
+}
+
+.menu li.hist:hover .hist-x, .menu li.hist.on .hist-x {
+    opacity: 1
+}
+
+.hist-x:hover {
+    background: var(--line);
+    color: var(--text)
+}
+
+@media (hover: none) {
+    .hist-x {
+        opacity: 1
+    }
+}
+
+.menu li.hist + li:not(.hist) {
+    margin-top: 6px;
+    position: relative
+}
+
+.menu li.hist + li:not(.hist)::before {
+    content: "";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: -4px;
+    border-top: 1px solid var(--line)
+}

@@ -94,5 +94,9 @@ export default {
 	"set.enabled": "Enable modules",
 	"set.reconnect": "Reconnect automatically",
 	"set.reconnectDelay": "Reconnect delay (seconds)",
-	"set.requestTimeout": "Server response timeout (seconds)"
+	"set.requestTimeout": "Server response timeout (seconds)",
+	"set.history": "Remember searches for 30 days",
+	"set.clearHistory": "Search history: {n} saved",
+	"historyClear": "Clear",
+	"forget": "Remove from history"
 };
