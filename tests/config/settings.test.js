@@ -14,6 +14,7 @@ describe('normalizeSettings', () => {
 				suggestions: false,
 				suggestionsMax: 3,
 				bookmarkSuggestions: false,
+				history: false,
 				autofocus: false,
 				directUrls: false
 			},

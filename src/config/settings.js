@@ -11,6 +11,7 @@ export const DEFAULTS = {
 		suggestions: true,     // DuckDuckGo autocomplete
 		suggestionsMax: 8,     // how many suggestions to show
 		bookmarkSuggestions: true, // matching bookmarks are offered first in the dropdown
+		history: true,         // remember searches for 30 days and offer them after bookmarks (turning it off deletes it)
 		autofocus: true,       // focus the search field when the page opens
 		directUrls: true      // typing a full http(s) address opens it instead of searching
 	},

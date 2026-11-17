@@ -29,6 +29,7 @@ The gear button (top left) opens the settings dialog. Everything is saved in `lo
 | Search     | Open results in                       | same tab (default) / new tab                                                                                                                                   |
 | Search     | Suggestions, number of suggestions    | on/off; 3, 5, 8, 10                                                                                                                                            |
 | Search     | Offer matching bookmarks              | on/off: a bookmark whose name or address contains the typed text is shown first in the dropdown (with its icon and a bookmark mark); Enter or a click opens it |
+| Search     | Remember searches for 30 days         | on/off (default on): see [Search history](history.md); switching it off deletes the saved history. The **Clear** button deletes it too                                      |
 | Search     | Focus the search field on load        | on/off                                                                                                                                                         |
 | Search     | Open typed web addresses directly     | on/off                                                                                                                                                         |
 | Appearance | Theme                                 | auto (system) / light / dark                                                                                                                                   |
@@ -87,6 +88,9 @@ copy(localStorage.getItem("startpage:v1")); // backup (to clipboard)
 localStorage.setItem("startpage:v1", "<pasted json>"); // restore, then reload
 localStorage.removeItem("startpage:v1"); // reset everything
 ```
+
+The search history is deliberately **not** in this key; it lives in `startpage:history:v1` (see [Search history](history.md)),
+so a backup of the state does not contain it. Remove it with `localStorage.removeItem("startpage:history:v1")` or the **Clear** button.
 
 Widgets also keep short-lived caches under keys starting with `startpage:cache:`; they can be removed safely. The data
 lives in the browser profile and origin, so the address (host and port) must stay the same.

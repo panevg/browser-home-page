@@ -94,5 +94,9 @@ export default {
 	"set.enabled": "Module aktivieren",
 	"set.reconnect": "Automatisch neu verbinden",
 	"set.reconnectDelay": "Wartezeit für erneutes Verbinden (Sekunden)",
-	"set.requestTimeout": "Zeitlimit für Serverantworten (Sekunden)"
+	"set.requestTimeout": "Zeitlimit für Serverantworten (Sekunden)",
+	"set.history": "Suchanfragen 30 Tage lang merken",
+	"set.clearHistory": "Suchverlauf: {n} gespeichert",
+	"historyClear": "Löschen",
+	"forget": "Aus dem Verlauf entfernen"
 };

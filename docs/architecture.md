@@ -54,6 +54,13 @@ global scope.
 
 While a chunk loads, `WidgetSkeleton.vue` is shown; if it fails to load, `WidgetError.vue` is shown.
 
+## Search history
+
+The search history is **not** in `state`: it has its own `localStorage` key (`startpage:history:v1`) so that backups of the state never contain
+it. `src/utils/history.js` holds the pure rules (what may be stored, 30-day expiry, matching) and `src/history.js` the live list, saving,
+cross-tab sync and deletion when the setting is switched off. The dropdown in `SearchBox.vue` is built as bookmarks, then history, then
+suggestions. Details and the security model: [Search history](history.md).
+
 ## Modules
 
 Modules are panels driven by a server over WebSocket (bottom-left button). `state.modules` holds `{ id, name, url, hidden, autoConnect, size, values }`
