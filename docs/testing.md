@@ -19,6 +19,7 @@ npm run coverage       # run once and print coverage; HTML-ready lcov report in 
 | `state.js`      | Loading, repairing corrupted data, migration of the old `language` field, saving on every change                                                                           |
 | `i18n/`         | Language detection, fallbacks, `{param}` formatting, relative dates, and a guard that **every language has the same keys as English (UK)** for the app and for each widget |
 | `composables/`  | Bookmarks (title lookup), widgets, drag and drop (mouse and touch), the "after load" flag                                                                                  |
+| `modules/`      | Module protocol and UI validation, the connection (handshake, requests, reconnect), the runtime (actions, saved values) and an end-to-end run against `examples/module-server.mjs` (Node 22+; skipped without a built-in `WebSocket`) |
 | `widgets/`      | Registry discovery and order, widget definitions and summaries                                                                                                             |
 | `components/`   | Cactus, News, To-do, Notes, Bookmark grid, Bookmark and Widget dialogs                                                                                                     |
 | `vite-plugins/` | The `/feed-proxy` middleware against real local HTTP servers (Node environment)                                                                                            |

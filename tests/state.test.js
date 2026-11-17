@@ -19,8 +19,8 @@ beforeEach(() => localStorage.clear());
 describe('state: loading', () => {
 	it('starts with defaults when nothing is stored, and saves them', async () => {
 		const state = await load();
-		expect({...state}).toEqual({engine: 0, lang: null, settings: DEFAULTS, bookmarks: [], widgets: []});
-		expect(saved()).toEqual({engine: 0, lang: null, settings: DEFAULTS, bookmarks: [], widgets: []});
+		expect({...state}).toEqual({engine: 0, lang: null, settings: DEFAULTS, bookmarks: [], widgets: [], modules: []});
+		expect(saved()).toEqual({engine: 0, lang: null, settings: DEFAULTS, bookmarks: [], widgets: [], modules: []});
 	});
 
 	it.each(['{broken json', 'null', '[]', '"text"', '42'])('survives corrupted storage: %s', async raw => {
@@ -142,5 +142,17 @@ describe('state: saving', () => {
 		expect(() => {
 			state.engine = 1;
 		}).not.toThrow();
+	});
+});
+describe('state: modules', () => {
+	it('keeps valid modules and repairs the fields', async () => {
+		const state = await load({modules: [{id: 'm1', name: 'Demo', url: 'ws://localhost:8787', size: 'l', hidden: true, autoConnect: false, values: {a: 'x', 'bad key': 1, b: {}}}, {url: 'example.com/mod'}]});
+		expect(state.modules[0]).toEqual({id: 'm1', name: 'Demo', url: 'ws://localhost:8787/', hidden: true, autoConnect: false, size: 'l', values: {a: 'x'}});
+		expect(state.modules[1]).toMatchObject({url: 'wss://example.com/mod', name: 'example.com', size: 'm', autoConnect: true, hidden: false, values: {}});
+	});
+
+	it('drops modules whose address is not ws:// or wss://', async () => {
+		const state = await load({modules: [{url: 'http://example.com'}, {url: 'javascript:alert(1)'}, {url: 5}, null, 'x']});
+		expect(state.modules).toEqual([]);
 	});
 });

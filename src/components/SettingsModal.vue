@@ -38,6 +38,14 @@ const sections = [
       {key: 'tileLabels', type: 'switch'},
       {key: 'bookmarksOpenIn', type: 'seg'}
     ]
+  },
+  {
+    title: 'secModules', group: 'modules', rows: [
+      {key: 'enabled', type: 'switch'},
+      {key: 'reconnect', type: 'switch', dep: 'enabled'},
+      {key: 'reconnectDelay', type: 'select', dep: 'reconnect'},
+      {key: 'requestTimeout', type: 'select', dep: 'enabled'}
+    ]
   }
 ];
 

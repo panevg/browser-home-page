@@ -1,5 +1,5 @@
 // Drag & drop reordering. dnd(group, list, id) returns the attributes / handlers for ONE item (use with v-bind).
-// Items move only inside their own group ('bookmarks' or 'widgets').
+// Items move only inside their own group ('bookmarks', 'widgets' or 'modules').
 let drag = null, timer = null, moved = false;
 
 function reorder(list, from, to) {
@@ -33,7 +33,7 @@ export function dnd(group, list, id) {
 				drag = {group, id, touch: true};
 				navigator.vibrate?.(10);
 			};
-			if (group === 'widgets') {
+			if (group !== 'bookmarks') { // widgets and modules: by the handle
 				if (e.target.closest('.handle')) start();
 			} else {
 				clearTimeout(timer);

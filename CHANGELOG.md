@@ -12,6 +12,16 @@
 
 ### Added
 
+- **Modules.** The bottom-left button opens a dialog where a module is added by the address of a WebSocket server
+  (`ws://` / `wss://`, saved before the panel is created). The panel looks like a widget (hide, show, delete, drag by the
+  handle; modules only swap with modules) and is driven by the server through a small protocol with three message types:
+  `ui` (the abstract interface, always the first message), `data` (information in both directions) and `request`
+  (asking for information in both directions; the answer is a `data` message with `reply`). The interface is limited to
+  a fixed set of components with a fixed look (`src/modules/protocol.js`); components can send input values to the
+  server under a chosen identifier, request information, or wait for the next `ui`. Settings: per module (name, address,
+  connect automatically, height) and global (enable, reconnect, delay, timeout); inputs marked `persist` are saved.
+  See `docs/modules.md`, the zero-dependency demo server `examples/module-server.mjs` (`npm run example:module`) and the
+  tests in `tests/modules/`.
 - **Bookmarks in search.** Up to 3 bookmarks whose title or address contains the typed text are shown first in the
   dropdown (favicon on the left, bookmark mark on the right, arrow keys / Enter / click open them; `matchBookmarks()` in
   `src/utils/misc.js`). Can be switched off in the settings.

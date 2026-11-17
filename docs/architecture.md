@@ -54,6 +54,13 @@ global scope.
 
 While a chunk loads, `WidgetSkeleton.vue` is shown; if it fails to load, `WidgetError.vue` is shown.
 
+## Modules
+
+Modules are panels driven by a server over WebSocket (bottom-left button). `state.modules` holds `{ id, name, url, hidden, autoConnect, size, values }`
+per module and is validated on load (`ws://` / `wss://` only). `WidgetList` renders them after the widgets; each `ModuleView` acquires a runtime
+(`src/modules/runtime.js`) on mount and releases it (closing the socket) on unmount, so hidden modules are disconnected. The server's UI is
+reduced to a fixed set of components by `sanitizeNode()` and drawn by `ModuleNode.vue`. The protocol and how to extend it: [Modules](modules.md).
+
 ## Localization
 
 `i18n/index.js` keeps a reactive `data` object, so changing the language or loading a pack re-renders every `t()` /
