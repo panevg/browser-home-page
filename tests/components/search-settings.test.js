@@ -1,5 +1,5 @@
 import {afterEach, beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
-import {flushPromises, mount} from '@vue/test-utils';
+import {enableAutoUnmount, flushPromises, mount} from '@vue/test-utils';
 import {use} from '@/i18n';
 import {state} from '@/state';
 import {DEFAULTS} from '@/config/settings';
@@ -14,7 +14,14 @@ beforeEach(() => {
 	Object.assign(state.settings.search, DEFAULTS.search);
 	Object.assign(state.settings.ui, DEFAULTS.ui);
 });
-afterEach(() => vi.restoreAllMocks());
+// Unmount every component after each test. SearchBox starts a 120 ms debounce timer for every typed text; a component that is
+// left mounted fires it later, in the middle of another test, where it called that test's stubbed `fetch` (a flaky failure).
+enableAutoUnmount(afterEach);
+afterEach(() => {
+	vi.restoreAllMocks();
+	vi.useRealTimers();
+	vi.unstubAllGlobals();
+});
  
 async function search(text) {
 	const w = mount(SearchBox);
