@@ -24,6 +24,8 @@ npm run coverage       # run once and print coverage; HTML-ready lcov report in 
 | `components/`   | Cactus, News, To-do, Notes, Bookmark grid, Bookmark and Widget dialogs                                                                                                     |
 | `vite-plugins/` | The `/feed-proxy` middleware against real local HTTP servers (Node environment)                                                                                            |
 
+The farm rules (`widgets/farm/game.js`, `layout.js`) are tested without a browser; the canvas drawing (`render.js`) is not (jsdom has no canvas).
+
 Not covered yet: `App.vue`, `SearchBox`, `SettingsModal`, `WidgetList` and the Weather, GitHub, Rates and Calendar widgets.
 
 ## Writing tests
