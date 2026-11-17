@@ -11,7 +11,7 @@ its `localStorage`.
   is given, the page title is used.
 - **Widgets:** loaded lazily after the page opens (each widget is its own code chunk). They can be hidden, removed and
   rearranged. Built in: GitHub (activity and pinned repositories), clock and weather, calendar, to-do list, notes,
-  exchange rates, news (RSS/Atom) and a virtual cactus. Any number of widgets, of any mix of types, can be on the page.
+  exchange rates, news (RSS/Atom) a virtual cactus and a small farm game (canvas). Any number of widgets, of any mix of types, can be on the page.
 - **Modules:** panels driven by your own server over WebSocket. The server sends an abstract UI (text, buttons, inputs, ...),
   the page draws it, and actions go back as messages. Added with the bottom-left button; see [docs/modules.md](docs/modules.md)
   and the demo server (`npm run example:module`).

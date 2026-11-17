@@ -12,6 +12,11 @@
 
 ### Added
 
+- **Farm widget.** A small canvas game: coins arrive every hour, you build pens and buy animals (chicken, pig, sheep, cow),
+  they are fully grown after 10 minutes and can be sold for a small amount. Selling a quota of animals raises the level,
+  which raises the hourly income; every 5 levels all prices rise, and the first animal bought at the raised price is a
+  *lucky* one that grows twice as long and sells for twice as much. Animals only move linearly, there are no sprites.
+  Rules and numbers: `docs/widgets.md`, `src/widgets/farm/game.js`.
 - **Modules.** The bottom-left button opens a dialog where a module is added by the address of a WebSocket server
   (`ws://` / `wss://`, saved before the panel is created). The panel looks like a widget (hide, show, delete, drag by the
   handle; modules only swap with modules) and is driven by the server through a small protocol with three message types:

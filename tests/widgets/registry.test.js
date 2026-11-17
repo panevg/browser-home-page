@@ -4,11 +4,11 @@ import {components, widgetMeta, widgetTypes} from '@/widgets/registry';
 
 describe('widget registry', () => {
 	it('discovers every widget folder', () => {
-		expect(Object.keys(widgetMeta).sort()).toEqual(['cactus', 'calendar', 'github', 'news', 'notes', 'rates', 'todo', 'weather']);
+		expect(Object.keys(widgetMeta).sort()).toEqual(['cactus', 'calendar', 'farm', 'github', 'news', 'notes', 'rates', 'todo', 'weather']);
 	});
 
 	it('sorts the picker by `order`', () => {
-		expect(widgetTypes).toEqual(['github', 'weather', 'calendar', 'todo', 'notes', 'rates', 'news', 'cactus']);
+		expect(widgetTypes).toEqual(['github', 'weather', 'calendar', 'todo', 'notes', 'rates', 'news', 'cactus', 'farm']);
 	});
 
 	it('has a lazy component for every widget', () => {
@@ -59,6 +59,10 @@ describe('widget summaries (shown for hidden widgets)', () => {
 		expect(widgetMeta.news.summary({feed: 'https://feeds.bbci.co.uk/news/rss.xml'})).toBe('feeds.bbci.co.uk');
 		expect(widgetMeta.news.summary({feed: 'not a url'})).toBe('not a url');
 		expect(widgetMeta.news.summary({})).toBe('');
+	});
+	it('farm: level and coins, else the name', () => {
+		expect(widgetMeta.farm.summary({farm: {level: 3, coins: 120}})).toBe('Level 3 · 120 coins');
+		expect(widgetMeta.farm.summary({})).toBe('Farm');
 	});
 	it('cactus: name, else the default name', () => {
 		expect(widgetMeta.cactus.summary({name: 'Spike'})).toBe('Spike');
