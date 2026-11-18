@@ -1,5 +1,14 @@
 # Widgets
 
+> Write a widget step by step, then see the built-in widgets and the rules of the two games.
+
+**On this page:** [Overview](#overview) · [1. `index.js`](#1-indexjs-metadata) · [2. Component](#2-component) · [3. Language packs](#3-language-packs) ·
+[Cheat sheet](#widget-api-cheat-sheet) · [Layout and theme](#layout-and-theme) · [Built-in widgets](#built-in-widgets) · [Checklist](#checklist)
+
+For the formal description of every property and helper, see the [API reference](api.md#widgets).
+
+## Overview
+
 A widget is a folder in `src/widgets/` with a Vue single-file component, a small metadata file and language packs. Adding one never requires touching `App.vue`, `registry.js` or any other shared file: the registry discovers it automatically.
 
 ```
@@ -121,3 +130,20 @@ A canvas game. Click an **empty spot** to buy the chosen animal, a **grown anima
 | Lucky animal | The **first animal bought after a new price tier** (so at the raised price) is *lucky*: it grows twice as long (20 minutes) and sells for **twice** as much. It has a gold outline and a star |
 
 Animals only move in a straight line, back and forth inside their own place, at a constant speed; there are no sprites, only flat shapes.
+
+## Checklist
+
+Before you consider a widget done:
+
+- [ ] The folder name is final (it is the saved type), and `index.js` has `fields`, `summary` and `component`.
+- [ ] Language packs exist for **every** language, with `name`, `description` and a key for every field label (`npm test` checks the keys).
+- [ ] The root fills the box (`height: 100%`) and works in the dark theme (only theme variables, no fixed colours for text and backgrounds).
+- [ ] It looks right on a phone (`@media (max-width: 620px)`).
+- [ ] Timers and listeners are cleared in `onBeforeUnmount`.
+- [ ] Data from outside is shown as text; links are `http(s)` only and open with `rel="noopener"`.
+- [ ] Network data goes through `cached(...)`, and failures show a message instead of an empty box.
+- [ ] A test covers the logic (see [Testing](testing.md)).
+
+---
+
+**See also:** [API reference](api.md#widgets) · [Localization](localization.md) · [Architecture](architecture.md#widgets-and-lazy-loading)

@@ -6,9 +6,11 @@ import {reactive, watch} from 'vue';
 import {state} from '@/state';
 import {addEntry, normalizeHistory, removeEntry} from '@/utils/history';
 
+/** The `localStorage` key of the history (separate from `startpage:v1` on purpose). */
 export const HISTORY_KEY = 'startpage:history:v1';
 
-export const history = reactive([]); // [{ q, t (last used, ms), n (times used) }], newest first
+/** The live history, newest first. Read it; change it only with `record`, `forget` and `clearHistory`. @type {import('@/types').HistoryEntry[]} */
+export const history = reactive([]);
 
 const read = () => {
 	try {
@@ -29,18 +31,27 @@ function save() {
 const replace = list => history.splice(0, history.length, ...list);
 const enabled = () => state.settings.search.history;
 
+/** Deletes the whole history, including the saved copy. */
 export function clearHistory() {
 	history.splice(0);
 	save();
 }
 
-// Called when a search is made (never for opened addresses or bookmarks).
+/**
+ * Remembers a search. Does nothing while the history is switched off or when the text looks sensitive.
+ * Call it for real searches only, never for opened addresses or bookmarks.
+ * @param {string} text
+ */
 export function record(text) {
 	if (!enabled()) return;
 	replace(addEntry(history.map(e => ({...e})), text));
 	save();
 }
 
+/**
+ * Removes one search from the history.
+ * @param {string} q
+ */
 export function forget(q) {
 	replace(removeEntry(history, q));
 	save();

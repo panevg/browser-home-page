@@ -1,5 +1,9 @@
 # Testing and CI
 
+> Running and writing tests, and what continuous integration checks.
+
+**On this page:** [Running the tests](#running-the-tests) · [What is covered](#what-is-covered) · [Writing tests](#writing-tests) · [Continuous integration](#continuous-integration)
+
 ## Running the tests
 
 Unit tests use [Vitest](https://vitest.dev) with jsdom and `@vue/test-utils`. Everything lives in `tests/`, mirroring `src/`.
@@ -22,12 +26,12 @@ npm run coverage       # run once and print coverage; HTML-ready lcov report in 
 | `modules/`      | Module protocol and UI validation, the connection (handshake, requests, reconnect), the runtime (actions, saved values) and an end-to-end run against `examples/module-server.mjs` (Node 22+; skipped without a built-in `WebSocket`) |
 | `history`       | Search history: what may be stored, expiry, matching order (`utils/history`), storage, cross-tab sync and deletion (`history.test.js`), and the dropdown and settings (`components/search-settings`) |
 | `widgets/`      | Registry discovery and order, widget definitions and summaries                                                                                                             |
-| `components/`   | Cactus, News, To-do, Notes, Bookmark grid, Bookmark and Widget dialogs                                                                                                     |
+| `components/`   | Search box and settings, modules, Farm, Cactus, News, To-do, Notes, Bookmark grid, Bookmark and Widget dialogs                                                                                                     |
 | `vite-plugins/` | The `/feed-proxy` middleware against real local HTTP servers (Node environment)                                                                                            |
 
 The farm rules (`widgets/farm/game.js`, `layout.js`) are tested without a browser; the canvas drawing (`render.js`) is not (jsdom has no canvas).
 
-Not covered yet: `App.vue`, `SearchBox`, `SettingsModal`, `WidgetList` and the Weather, GitHub, Rates and Calendar widgets.
+Not covered yet: `App.vue`, `WidgetList` and the Weather, GitHub, Rates and Calendar widgets. `SearchBox`, `SettingsModal` (search, history and module settings), `ModulesModal`, `ModuleNode` and the Farm widget are covered.
 
 ## Writing tests
 
@@ -46,3 +50,7 @@ Not covered yet: `App.vue`, `SearchBox`, `SettingsModal`, `WidgetList` and the W
 3. **All checks passed**: a single job that fails if either of the above failed.
 
 Commit `package-lock.json` after changing dependencies: CI installs with `npm ci`, which fails when the lock file and `package.json` disagree.
+
+---
+
+**See also:** [Architecture](architecture.md) · [CHANGELOG](../CHANGELOG.md)

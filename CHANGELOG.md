@@ -49,6 +49,13 @@
 
 ### Changed
 
+- **Documentation and public API polished.** New `docs/api.md` lists every extension point (widgets, localization, settings,
+  engines, state, history, module protocol, styling) with signatures and examples; `docs/README.md` has a start-here table
+  and a glossary; `README.md` is a short entry point; the guides cross-link and share one structure. All shapes used by the
+  extension points are defined once in `src/types.js` (JSDoc typedefs, picked up by editors through `jsconfig.json`), and
+  every exported function you are meant to call has JSDoc with parameters, return value and an example where it helps.
+  The JSDoc was checked with the TypeScript checker (no errors); two wrong `@param` names in `src/i18n/index.js` and a few
+  imprecise return types (`parseMessage`, `normalizeSettings`) were corrected. No behaviour changed.
 - RSS parsing moved to `src/utils/feed.js` and the proxy plugin to `vite-plugins/feed-proxy.js` so they can be tested on
   their own (no behaviour change).
 - The bookmarks grid uses the shared thin site scrollbar (`.scroll`) instead of the browser default.

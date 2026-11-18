@@ -1,12 +1,22 @@
 // RSS / Atom parsing for the news widget (kept separate from the component so it can be tested on its own).
 
+/**
+ * Parses text as an XML document.
+ * @param {string} text A leading UTF-8 byte-order mark is ignored.
+ * @returns {Document}
+ * @throws {Error} When the text is not well-formed XML.
+ */
 export function parseDoc(text) {
 	const doc = new DOMParser().parseFromString(String(text).replace(/^\uFEFF/, '').trim(), 'text/xml');
 	if (doc.querySelector('parsererror')) throw new Error('not a valid feed');
 	return doc;
 }
 
-// True only for well-formed XML that contains at least one <item> / <entry>.
+/**
+ * Tells a real feed from anything else (for example an error page returned by a proxy).
+ * @param {string} text
+ * @returns {boolean} `true` only for well-formed XML that contains at least one `<item>` or `<entry>`.
+ */
 export const isFeed = text => {
 	try {
 		return parseDoc(text).querySelector('item, entry') !== null;
@@ -15,7 +25,12 @@ export const isFeed = text => {
 	}
 };
 
-// -> [{ title, url, date }] (max 30). Only http(s) links are kept: the data comes from outside.
+/**
+ * Reads the items of an RSS or Atom feed. Only `http(s)` links are kept, because the data comes from outside.
+ * @param {string} text
+ * @returns {{title: string, url: string, date: string}[]} At most 30 items.
+ * @throws {Error} When the text is not a valid feed document.
+ */
 export function parseFeed(text) {
 	const doc = parseDoc(text);
 	return [...doc.querySelectorAll('item, entry')].map(n => {

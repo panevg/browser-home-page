@@ -6,7 +6,8 @@ import {data as i18nData} from '@/i18n';
 import {createConnection} from './connection';
 import {INPUTS, PROTOCOL} from './protocol';
 
-export const runtimes = reactive({}); // moduleId -> runtime (the modules dialog reads the status from here)
+/** The live runtimes by module id (the modules dialog reads the status from here). */
+export const runtimes = reactive({});
 const MAX_DATA_KEYS = 200;
 
 const defaults = () => ({
@@ -20,6 +21,14 @@ function inputsOf(node, out = []) {
 	return out;
 }
 
+/**
+ * Creates the live state of one module: `status` (`idle`, `disabled`, `connecting`, `waiting`, `ready`, `closed`,
+ * `failed`), `title`, `root` (the UI), `data` (what the server pushed), `values` (input values), `pending`, `error`, and the
+ * methods `start()`, `connect()`, `stop()`, `run(steps)` and `setValue(id, value)`.
+ * @param {import('@/types').ModuleEntry} mod
+ * @param {{getSettings: () => import('@/types').ModuleSettings, getClient: () => object, WS?: typeof WebSocket}} [deps]
+ *        Replaced in tests; the defaults use the app's settings and the real WebSocket.
+ */
 export function createRuntime(mod, {getSettings, getClient, WS} = defaults()) {
 	// status: idle | disabled | connecting | waiting | ready | closed | failed
 	const rt = reactive({status: 'idle', detail: '', title: '', root: null, data: {}, values: {}, pending: false, error: ''});
@@ -48,7 +57,10 @@ export function createRuntime(mod, {getSettings, getClient, WS} = defaults()) {
 		rt.title = m.title;
 		rt.root = m.root;
 		rt.error = '';
-		const next = {}, keep = {};
+		/** @type {Record<string, string|number|boolean>} */
+		const next = {};
+		/** @type {Record<string, string|number|boolean>} */
+		const keep = {};
 		persist.clear();
 		for (const n of inputsOf(m.root)) {
 			const ok = x => x !== undefined && typeof x === typeof n.value;
@@ -142,6 +154,10 @@ export function createRuntime(mod, {getSettings, getClient, WS} = defaults()) {
 	});
 }
 
+/**
+ * Creates and starts the runtime of a module (a panel does this when it is shown).
+ * @param {import('@/types').ModuleEntry} mod
+ */
 export function acquire(mod, deps) {
 	release(mod.id);
 	const rt = createRuntime(mod, deps);
@@ -150,6 +166,7 @@ export function acquire(mod, deps) {
 	return runtimes[mod.id];
 }
 
+/** Disconnects and forgets a module's runtime (a panel does this when it is hidden or removed). @param {string} id */
 export function release(id) {
 	runtimes[id]?.stop();
 	delete runtimes[id];

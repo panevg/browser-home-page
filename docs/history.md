@@ -1,5 +1,9 @@
 # Search history
 
+> What is remembered for 30 days, how the dropdown is ordered, and how the history is kept safe.
+
+**On this page:** [What is remembered](#what-is-remembered) · [Security and privacy](#security-and-privacy) · [For developers](#for-developers)
+
 The page remembers what you searched for **for 30 days** and offers it while you type. The dropdown has a fixed priority:
 
 1. **Bookmarks** that match the typed text (up to 3),
@@ -51,3 +55,7 @@ Use the switch, **Clear** or a private window if that matters. The page cannot t
 - **Make the filter stricter or looser:** edit `isSensitive()` and add the case to `tests/utils/history.test.js`.
 - **Show more rows:** the limits are the arguments of `matchBookmarks(..., 3)` and `matchHistory(..., 4)` in `SearchBox.vue`.
 - **Reset it by hand:** `localStorage.removeItem("startpage:history:v1")` in the console of the page.
+
+---
+
+**See also:** [API reference](api.md#search-history) · [Customization](customization.md) · [Architecture](architecture.md#search-and-search-history)

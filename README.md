@@ -1,28 +1,18 @@
 # Custom Start Page
 
-A personal start page for your browser: search, bookmarks and widgets in one place. It is a static single-page app built
-with **Vue 3 + Vite**. There is no backend and no accounts: everything runs in your browser and your data is stored in
-its `localStorage`.
+> A personal start page for your browser: search, bookmarks and widgets in one place.
+> A static app (**Vue 3 + Vite**) with no backend and no accounts. Everything runs in your browser.
 
-## Features
+## Highlights
 
-- **Search:** suggestions (like Google) and a choice of search engines (similar to Tor Browser).
-- **Bookmarks:** a grid of icons. Add one with the `+` button in the top-right corner or with `Shift` + `+`. If no name
-  is given, the page title is used.
-- **Widgets:** loaded lazily after the page opens (each widget is its own code chunk). They can be hidden, removed and
-  rearranged. Built in: GitHub (activity and pinned repositories), clock and weather, calendar, to-do list, notes,
-  exchange rates, news (RSS/Atom) a virtual cactus and a small farm game (canvas). Any number of widgets, of any mix of types, can be on the page.
-- **Modules:** panels driven by your own server over WebSocket. The server sends an abstract UI (text, buttons, inputs, ...),
-  the page draws it, and actions go back as messages. Added with the bottom-left button; see [docs/modules.md](docs/modules.md)
-  and the demo server (`npm run example:module`).
-- **Search history:** searches are remembered for 30 days and offered while you type, in the order bookmarks, history,
-  suggestions. Secrets and personal data are never stored, history is kept apart from the page state, and it can be
-  cleared or switched off (which deletes it). See [docs/history.md](docs/history.md).
-- **Drag and drop:** move bookmarks and widgets with the mouse or a touch screen (drag widgets by the ⠿ handle,
-  bookmarks after a long press).
-- **Languages:** English (United Kingdom) and Ukrainian. The language is picked from your system settings and the list
-  can be extended.
-- **Light and dark themes:** follows your system; works on mobile.
+| | |
+| --- | --- |
+| **Search** | Suggestions as you type and a choice of search engines. The dropdown is ordered **bookmarks → history → suggestions**. |
+| **Bookmarks** | A grid of icons. Add one with `+` (top right) or `Shift` + `+`; without a name, the page title is used. |
+| **Widgets** | GitHub activity, clock and weather, calendar, to-do list, notes, exchange rates, news (RSS/Atom), a virtual cactus and more. Loaded lazily, one code chunk each. Hide, remove and reorder them. |
+| **Modules** | Panels driven by **your own server over WebSocket**: the server sends an abstract UI, the page draws it, actions go back as messages. [Learn more](docs/modules.md) |
+| **Search history** | Searches are remembered for 30 days. Secrets and personal data are never stored; it can be cleared or switched off. [Learn more](docs/history.md) |
+| **Personal** | Light, dark or system theme, accent colours, English, Ukrainian and German (more can be added), drag and drop on mouse and touch, mobile layout. |
 
 ## Quick start
 
@@ -33,66 +23,67 @@ npm install
 npm run dev        # development server with hot reload: http://localhost:2784
 ```
 
-To use it day to day, build once and serve the result:
+For everyday use, build once and serve the result:
 
 ```sh
 npm run build      # creates dist/
 npm run preview    # serves dist/ at http://localhost:2783
-# or simply: ./start.sh   (installs, builds and serves as needed)
+# or just: ./start.sh   (installs, builds and serves as needed)
 ```
 
-Then set `http://localhost:2783` as your browser home page (Firefox: `about:preferences#home`, "Custom URLs").
+Then set `http://localhost:2783` as your browser's home page (Firefox: `about:preferences#home`, "Custom URLs").
 
-> The port is fixed (`strictPort`) because `localStorage` belongs to the origin: a different address means an empty
-> page. The built `dist/` must be served over HTTP; opening `dist/index.html` from disk does not work because browsers
-> block ES modules on `file://`.
+> **Keep the address the same.** `localStorage` belongs to the origin, so a different host or port is an empty page.
+> The port is fixed for this reason. Serve `dist/` over HTTP: opening `dist/index.html` from disk does not work, because
+> browsers block ES modules on `file://`.
 
-## Tests
+## Scripts
 
-```sh
-npm test            # unit tests (Vitest + jsdom)
-npm run coverage    # the same, with a coverage report
-```
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Development server with hot reload (port 2784) |
+| `npm run build` | Production build into `dist/` |
+| `npm run preview` | Serves `dist/` (port 2783) |
+| `npm test` | Unit tests (Vitest + jsdom) |
+| `npm run coverage` | Tests with a coverage report |
+| `npm run example:module` | Demo server for [modules](docs/modules.md) on `ws://localhost:8787` |
 
-GitHub Actions (`.github/workflows/ci.yml`) runs the tests and the build on every pull request and every push to `main`.
-See [docs/testing.md](docs/testing.md), including how to make the checks mandatory for `main`.
+## Documentation
+
+Start with the [documentation index](docs/README.md).
+
+| I want to... | Read |
+| --- | --- |
+| install, run and use it | [Getting started](docs/getting-started.md) |
+| add a widget | [Widgets](docs/widgets.md) |
+| add a language | [Localization](docs/localization.md) |
+| change engines, theme or settings | [Customization](docs/customization.md) |
+| connect my own server | [Modules](docs/modules.md) |
+| look up a function, type or extension point | [API reference](docs/api.md) |
+| understand how it works | [Architecture](docs/architecture.md) |
+| run or write tests | [Testing](docs/testing.md) |
+
+Changes between versions are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## Data and privacy
 
-Bookmarks, widgets, the language and the selected search engine are stored in `localStorage` under the key
-`startpage:v1` and saved on every change. Short-lived network caches use keys starting with `startpage:cache:`. External
-services are called directly from the browser: suggestions and icons (DuckDuckGo); page titles and RSS feeds (directly,
-then through the local `/feed-proxy` of the Vite server, then through public CORS proxies as a last resort); pinned
-repositories (local `/gh-profile` proxy); and the widget APIs (GitHub, Open-Meteo, open.er-api.com).
+Bookmarks, widgets, modules, settings, the language and the search engine are stored in your browser's `localStorage`
+(key `startpage:v1`) and saved on every change. The [search history](docs/history.md) has its own key, so backups of the
+state never contain it. Nothing is sent to a server of ours: there is none. External services are called directly from
+your browser (search suggestions and icons from DuckDuckGo, widget APIs, and CORS proxies for page titles and feeds);
+the full list is in the [architecture](docs/architecture.md#external-services).
 
 ## Project structure
 
 ```
-index.html              entry page (loads src/main.js)
-vite.config.js          Vite config (alias @ -> src, fixed port 2783, tests)
-vite-plugins/           Vite plugin: /feed-proxy
-tests/                  unit tests
-.github/workflows/      CI
-package.json
-start.sh                build + serve helper
-examples/               demo module server (no dependencies)
-src/
-  main.js               loads the language, mounts the app
-  App.vue               layout, global shortcuts, dialogs
-  state.js              the persisted reactive state (localStorage)
-  components/           UI pieces: SearchBox, BookmarkGrid, WidgetList, dialogs
-  composables/          bookmarks, widgets, drag and drop, "after page load"
-  config/engines.js     search engines
-  i18n/                 translation core
-  locales/              application languages
-  modules/              module protocol, WebSocket connection, per-module runtime
-  widgets/              registry.js + one folder per widget
-  utils/ directives/    helpers (cache, URL parsing, v-focus, ...)
-  styles/style.css      theme and layout
-docs/                   documentation
+src/             application code (see docs/architecture.md for the full tree)
+  widgets/       one folder per widget: the registry discovers them
+  locales/       interface languages
+  modules/       the WebSocket module protocol and runtime
+docs/            documentation
+examples/        demo module server
+tests/           unit tests, mirroring src/
 ```
 
-## Documentation
-
-See [docs/](docs/README.md): [getting started](docs/getting-started.md), [architecture](docs/architecture.md), [widgets](docs/widgets.md), [modules](docs/modules.md), [localization](docs/localization.md), [customization](docs/customization.md), [testing and CI](docs/testing.md).
-Notable changes from the previous no-build version are listed in [CHANGELOG.md](CHANGELOG.md).
+Continuous integration (`.github/workflows/ci.yml`) runs the tests and the build on every pull request; see
+[Testing](docs/testing.md).

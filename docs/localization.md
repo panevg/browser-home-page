@@ -1,35 +1,68 @@
 # Localization
 
-Two kinds of texts exist: application texts (`src/locales/`) and widget texts (`src/widgets/<type>/lang/`). Both are ES modules whose **default export** is an object of strings, and both are loaded on demand (one small chunk per file).
+> How the language is chosen and how to add a language to the application and to its widgets.
 
-## Language selection
+**On this page:** [How it works](#how-it-works) · [Add a language](#add-a-language) · [Strings with parameters](#strings-with-parameters) ·
+[Widget packs](#widget-packs) · [Keys](#keys)
 
-- First visit: the first entry of `navigator.languages` that matches a registered language is used. An exact match wins (`uk`), then the base language (`uk-UA` matches `uk`). Otherwise `en-GB` is used.
+## How it works
+
+There are two kinds of texts: **application texts** (`src/locales/`) and **widget texts** (`src/widgets/<type>/lang/`). Both
+are ES modules whose **default export** is an object of strings, and both are loaded on demand, one small chunk per file.
+
+- **First visit:** the first entry of `navigator.languages` that matches an available language is used. An exact match wins
+  (`de-DE`), then the base language (`de-AT` finds `de-DE`). Otherwise `en-GB` is used.
 - The choice is saved in the state (`lang`) and can be changed in the settings dialog.
-- Missing keys fall back to `en-GB`, and then to the key itself.
-- The language code is also used for `Intl` date and number formatting, so use valid BCP 47 codes (`de`, `pt-BR`, ...).
+- **Fallback:** a missing key falls back to `en-GB`, and then to the key itself. A missing file is not an error.
+- The code is also used for `Intl` date and number formatting, so use valid BCP 47 codes (`de`, `pt-BR`, ...).
+- Language names are written in the language itself and are shown without flags.
 
 ## Add a language
 
-1. Register it in `src/locales/index.js`. The name is shown as written, without a flag:
+1. Register it in `src/locales/index.js`:
 
    ```js
-   { code: 'de', name: 'Deutsch', load: () => import('./de.js') },
+   { code: 'fr', name: 'Français', load: () => import('./fr.js') },
    ```
 
-2. Copy `src/locales/en-GB.js` to `src/locales/de.js` and translate the values. Keep the keys.
-3. For each widget, copy `src/widgets/<type>/lang/en-GB.js` to `de.js` and translate it. Nothing needs to be registered: packs are discovered by their path.
+2. Copy `src/locales/en-GB.js` to `src/locales/fr.js` and translate the values. **Keep the keys.**
+3. For each widget, copy `src/widgets/<type>/lang/en-GB.js` to `fr.js` and translate it. Nothing needs to be registered:
+   packs are discovered by their path.
 
-The language appears in the settings dialog automatically.
+The language then appears in the settings dialog. A test checks that every language has exactly the same keys as
+English (UK), for the application and for every widget, so a missing or extra key fails `npm test`.
 
 ## Strings with parameters
 
-Use `{name}` placeholders and pass an object: `t('key', { name: 'x' })` in the application or `wt(type, 'key', { name: 'x' })` in widgets (both from `@/i18n`). Unknown placeholders are left as they are.
+Use `{name}` placeholders and pass an object:
+
+```js
+import { t, wt } from '@/i18n';
+
+t('set.clearHistory', { n: 3 });   // application string
+wt('farm', 'level', { n: 5 });     // widget string: wt(type, key, params)
+```
+
+Unknown placeholders are left as they are.
 
 ## Widget packs
 
-Packs are loaded after the page has loaded, for the current language and for `en-GB`, and again when the language changes. The "new widget" dialog also makes sure they are loaded. A widget pack must contain `name`, `description` and one key for every field `labelKey`. Everything else is up to the widget.
+Packs are loaded after the page has loaded, for the current language and for `en-GB`, and again when the language changes.
+The "new widget" dialog also makes sure they are loaded. A widget pack must contain `name`, `description` and one key for
+every field `labelKey`; everything else is up to the widget.
 
-## Application keys
+## Keys
 
-`pageTitle`, `settings`, `addBookmark`, `searchTitle`, `search`, `delete`, `addWidget`, `drag`, `hide`, `show`, `newBookmark`, `url`, `name`, `optionalTitle`, `cancel`, `add`, `newWidget`, `language`, `done`, `invalidUrl`, `widgetLoadError`.
+`src/locales/en-GB.js` is the list of application keys. They are grouped by prefix:
+
+| Prefix | Used for |
+| --- | --- |
+| *(plain)* | General labels and buttons: `settings`, `add`, `cancel`, `done`, `delete`, ... |
+| `sec…` | Section headings of the settings dialog |
+| `set.<key>` | Labels of settings (`set.history`, `set.reconnectDelay`, ...) |
+| `opt.<key>.<value>` | Labels of the choices of a setting (`opt.theme.dark`) |
+| `mod.…` | The modules dialog and the module panel (`mod.status.*`, `mod.err.*`) |
+
+---
+
+**See also:** [API reference: localization](api.md#localization) · [Widgets](widgets.md)

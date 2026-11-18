@@ -1,5 +1,6 @@
 import {wt} from '@/i18n';
 
+/** @type {import('@/types').WidgetDefinition} */
 export default {
 	order: 90,
 	fields: [],

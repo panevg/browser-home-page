@@ -1,3 +1,4 @@
+/** @type {import('@/types').WidgetDefinition} */
 export default {
 	order: 20,
 	fields: [{key: 'location', labelKey: 'locationLabel', placeholder: 'Berlin', required: true}],

@@ -1,7 +1,11 @@
-// The whole user state: one reactive object, written to localStorage synchronously on every change.
-//   { engine: number, lang: string|null, settings: { search, ui, modules }, bookmarks: [{ id, url, host, title }], widgets: [{ id, type, config, hidden }],
-//     modules: [{ id, name, url, hidden, autoConnect, size, values }] }
-// Widgets keep their own data inside `config`, so it is saved the same way.
+/**
+ * The whole user state: one reactive object that is written to `localStorage` synchronously on every change and
+ * validated when it is read, so damaged or old data can never break the page. The shape is `AppState` (src/types.js).
+ * Widgets keep their own data inside their `config`, so it is saved the same way.
+ *
+ * Not in here: the search history (it has its own key, see src/history.js) and the short-lived network caches
+ * (`startpage:cache:*`, see src/utils/cache.js).
+ */
 import {reactive, watch} from 'vue';
 import {widgetMeta} from '@/widgets/registry';
 import {parseHttpUrl} from '@/utils/url';
@@ -9,6 +13,7 @@ import {isId, parseWsUrl} from '@/modules/protocol';
 import {uid} from '@/utils/misc';
 import {normalizeSettings} from '@/config/settings';
 
+/** The `localStorage` key of the state. The origin (host and port) must stay the same, or the page starts empty. */
 export const STORAGE_KEY = 'startpage:v1';
 
 const isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
@@ -71,6 +76,7 @@ function normalize(raw) {
 	};
 }
 
+/** The live state. Change it directly; it is saved at once. @type {import('@/types').AppState} */
 export const state = reactive(normalize(read()));
 
 watch(state, write, {deep: true, flush: 'sync'});

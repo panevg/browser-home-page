@@ -1,3 +1,4 @@
+/** @type {import('@/types').WidgetDefinition} */
 export default {
 	order: 70,
 	fields: [

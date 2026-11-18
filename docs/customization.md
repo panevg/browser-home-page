@@ -1,5 +1,9 @@
 # Customization
 
+> Search engines, settings, theme, sizes, bookmarks, backup and reset.
+
+**On this page:** [Search engines](#search-engines) · [Settings](#settings-in-the-app) · [Backup and reset](#backup-and-reset)
+
 After editing the code, `npm run dev` reloads automatically; for the production build run `npm run build` again.
 
 ## Search engines
@@ -94,3 +98,7 @@ so a backup of the state does not contain it. Remove it with `localStorage.remov
 
 Widgets also keep short-lived caches under keys starting with `startpage:cache:`; they can be removed safely. The data
 lives in the browser profile and origin, so the address (host and port) must stay the same.
+
+---
+
+**See also:** [API reference: settings](api.md#settings) · [Getting started](getting-started.md)

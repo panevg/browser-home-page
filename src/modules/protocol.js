@@ -1,14 +1,27 @@
-// Client side of the module protocol (v1): validation of incoming messages and of the abstract UI, builders for outgoing ones.
-// Everything that comes from a server is untrusted: it is parsed, cut to the limits below and reduced to known fields,
-// so a server can only ever produce the components listed in SPEC. Full description: docs/modules.md
+/**
+ * Client side of the module protocol, version 1: validation of incoming messages and of the abstract UI, and builders for
+ * outgoing messages. Everything that comes from a server is untrusted: it is parsed, cut to the limits below and reduced
+ * to known fields, so a server can only ever produce the components listed in `SPEC`.
+ * The wire format for server authors: docs/modules.md
+ */
+
+/** Protocol version, sent as `v` in every client message. */
 export const PROTOCOL = 1;
+
+/** Hard limits for everything a server sends. */
 export const LIMITS = {message: 256 * 1024, depth: 8, nodes: 400, text: 4000, items: 200, options: 100, steps: 8, fields: 50};
 
 const isObj = v => v !== null && typeof v === 'object' && !Array.isArray(v);
 const RESERVED = ['__proto__', 'constructor', 'prototype'];
+/** Whether `v` is a valid identifier: 1 to 64 characters of `A-Z a-z 0-9 _ . : -`, and not a name that could pollute objects. */
 export const isId = v => typeof v === 'string' && /^[\w.:-]{1,64}$/.test(v) && !RESERVED.includes(v);
 
-// ---- Addresses: only ws:// and wss://. No scheme means wss:// ----
+// ---- Addresses ----
+/**
+ * Normalises a server address. Only `ws://` and `wss://` are accepted; no scheme means `wss://`.
+ * @param {string} input
+ * @returns {{url: string, host: string}|null} `null` when the input is not a usable address.
+ */
 export function parseWsUrl(input) {
 	let u = String(input || '').trim();
 	if (!u) return null;
@@ -61,6 +74,7 @@ const SPEC = {
 	select: {label: text, options, value: text, persist: bool},
 	slider: {label: text, min: num, max: v => num(v, 100), step: v => num(v, 1), value: num, persist: bool}
 };
+/** Components that hold a value; each needs a unique `id`. */
 export const INPUTS = new Set(['input', 'textarea', 'checkbox', 'select', 'slider']); // these need a unique `id`
 const EVENTS = {button: ['click'], input: ['change', 'submit'], textarea: ['change'], checkbox: ['change'], select: ['change'], slider: ['change']};
 
@@ -89,6 +103,14 @@ function actions(raw, events) {
 }
 
 // ---- UI tree ----
+/**
+ * Reduces an untrusted UI node (and its children) to the known components and properties: unknown types and fields are
+ * dropped, values are coerced to safe ones, limits are applied, and inputs without a unique `id` are removed.
+ * @param {*} raw  Anything: it comes from outside and is not trusted.
+ * @param {{nodes: number, ids: Set<string>}} [ctx]  Counters shared by the whole tree (internal: leave it out).
+ * @param {number} [depth]  Current depth (internal: leave it out).
+ * @returns {import('@/types').UiNode|null} `null` when the node is not a usable component.
+ */
 export function sanitizeNode(raw, ctx = {nodes: 0, ids: new Set()}, depth = 0) {
 	if (!isObj(raw) || depth > LIMITS.depth || ++ctx.nodes > LIMITS.nodes) return null;
 	if (!Object.hasOwn(SPEC, raw.type)) return null;
@@ -113,8 +135,12 @@ export function sanitizeNode(raw, ctx = {nodes: 0, ids: new Set()}, depth = 0) {
 }
 
 // ---- Messages ----
-// Returns {msg} or {error}. Types: ui (server -> client), data and request (both directions).
-// A reply to a request is a `data` message with `reply` = the request's `rid` (and `error` when it failed).
+/**
+ * Parses and validates one text frame from the server. Types: `ui` (server to client), `data` and `request` (both
+ * directions). A reply to a request is a `data` message with `reply` = the request's `rid` (and `error` when it failed).
+ * @param {unknown} raw  The frame; anything but a string (a binary frame) is an error.
+ * @returns {{msg?: import('@/types').ProtocolMessage, error?: 'json'|'size'|'shape'|'type'|'id'|'ui'}} Exactly one of `msg` (valid) and `error` (why not).
+ */
 export function parseMessage(raw) {
 	if (typeof raw !== 'string') return {error: 'json'};
 	if (raw.length > LIMITS.message) return {error: 'size'};
@@ -140,6 +166,9 @@ export function parseMessage(raw) {
 	}
 }
 
+/** A `data` message for the server, as JSON text. */
 export const dataMsg = (id, data) => JSON.stringify({v: PROTOCOL, type: 'data', id, data});
+/** A `request` message for the server, as JSON text. `rid` correlates the reply. */
 export const requestMsg = (id, rid, data) => JSON.stringify({v: PROTOCOL, type: 'request', id, rid, data});
+/** The answer to a server's request, as JSON text: `data`, or an `error` message when `error` is given. */
 export const replyMsg = (rid, data, error) => JSON.stringify(error ? {v: PROTOCOL, type: 'data', reply: rid, error: String(error)} : {v: PROTOCOL, type: 'data', reply: rid, data});
