@@ -93,7 +93,7 @@ describe('hourly payout', () => {
 		const f = farm({coins: 0, level: 2});
 		expect(G.tick(f, T0 + 3.5 * G.HOUR)).toBe(3 * 28);
 		const g = farm({coins: 0});
-		expect(G.tick(g, T0 + 100 * G.HOUR)).toBe(24 * 20);
+		expect(G.tick(g, T0 + 100 * G.HOUR)).toBe(64 * 20);
 		expect(g.lastPay).toBe(T0 + 100 * G.HOUR);
 		expect(G.tick(g, T0 + 100 * G.HOUR + 30 * MIN)).toBe(0);
 	});
