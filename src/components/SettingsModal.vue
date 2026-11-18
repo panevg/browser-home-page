@@ -1,5 +1,6 @@
 <script setup>
 import {state} from '@/state';
+import {clearHistory, history} from '@/history';
 import {t, use, languages} from '@/i18n';
 import {ENGINES} from '@/config/engines';
 import {ACCENTS, DEFAULTS, OPTIONS} from '@/config/settings';
@@ -10,7 +11,7 @@ const setLang = async code => {
   state.lang = await use(code);
 };
 
-// One row per setting. type: 'seg' (buttons) | 'switch' | 'select' | 'accent'. `dep` greys a row out when another one is off.
+// One row per setting. type: 'seg' (buttons) | 'switch' | 'select' | 'accent' | 'action' (a button). `dep` greys a row out when another one is off.
 // Option labels come from the locale key `opt.<key>.<value>`; numbers are shown as they are.
 const sections = [
   {
@@ -19,6 +20,8 @@ const sections = [
       {key: 'suggestions', type: 'switch'},
       {key: 'suggestionsMax', type: 'select', dep: 'suggestions'},
       {key: 'bookmarkSuggestions', type: 'switch'},
+      {key: 'history', type: 'switch'},
+      {key: 'clearHistory', type: 'action', dep: 'history'},
       {key: 'autofocus', type: 'switch'},
       {key: 'directUrls', type: 'switch'}
     ]
@@ -83,7 +86,7 @@ function reset() {
       </div>
 
       <div v-for="r in sec.rows" :key="r.key" :class="{ off: off(sec.group, r) }" class="srow">
-        <span>{{ t('set.' + r.key) }}</span>
+        <span>{{ t('set.' + r.key, {n: history.length}) }}</span>
 
         <div v-if="r.type === 'seg'" :aria-label="t('set.' + r.key)" class="seg" role="group">
           <button
@@ -105,6 +108,10 @@ function reset() {
         >
           <option v-for="o in OPTIONS[r.key]" :key="o" :value="o">{{ label(r.key, o) }}</option>
         </select>
+
+        <button v-else-if="r.type === 'action'" :disabled="off(sec.group, r) || !history.length" class="btn" type="button" @click="clearHistory">
+          {{ t('historyClear') }}
+        </button>
 
         <div v-else-if="r.type === 'accent'" :aria-label="t('set.accent')" class="swatches" role="group">
           <button

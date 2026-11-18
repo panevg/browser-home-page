@@ -1,5 +1,14 @@
 # Widgets
 
+> Write a widget step by step, then see the built-in widgets and the rules of the two games.
+
+**On this page:** [Overview](#overview) · [1. `index.js`](#1-indexjs-metadata) · [2. Component](#2-component) · [3. Language packs](#3-language-packs) ·
+[Cheat sheet](#widget-api-cheat-sheet) · [Layout and theme](#layout-and-theme) · [Built-in widgets](#built-in-widgets) · [Checklist](#checklist)
+
+For the formal description of every property and helper, see the [API reference](api.md#widgets).
+
+## Overview
+
 A widget is a folder in `src/widgets/` with a Vue single-file component, a small metadata file and language packs. Adding one never requires touching `App.vue`, `registry.js` or any other shared file: the registry discovers it automatically.
 
 ```
@@ -99,7 +108,42 @@ The widget box is 60% of the screen width and one third of its height on desktop
 | `rates` | base, targets | Exchange rates with a converter. |
 | `news` | feed URL, optional title | RSS or Atom headlines through the CORS proxy. |
 | `cactus` | optional name | See below. |
+| `farm` | none | A small farm game on a canvas. See below. |
 
 ### Cactus rules
 
 The cactus grows with real time, even while the page is closed. Its growth is `hours since planting + bonus`. The three actions (water, sunlight, fertiliser) can each be used once per hour and add a bonus of 0.25, 0.25 and 0.5 hours of growth. Using every action every hour at most doubles the speed. Stages start at 0, 1, 24, 72, 168 and 336 growth hours. Arms appear at 72 and 168 hours, and a flower at 336. State is stored in `config.planted`, `config.bonus` and `config.last`. The constants are at the top of `src/widgets/cactus/CactusWidget.vue`.
+
+### Farm rules
+
+A canvas game. Click an **empty spot** to buy the chosen animal, a **grown animal** (it has a gold dot) to sell it, and the dashed **+** tile to build another pen. Everything is computed from timestamps, so animals grow and coins arrive while the page is closed (hiding the widget pauses nothing except the display). The state is `config.farm`; the rules are pure functions in `src/widgets/farm/game.js`, the geometry is in `layout.js`, the drawing in `render.js`. All numbers are constants at the top of `game.js`.
+
+| Rule | Value |
+| --- | --- |
+| Hourly income | `20 + 8 × (level − 1)` coins, paid automatically every hour; at most 24 missed hours are paid when you come back |
+| Start | 40 coins, level 1, one pen (4 places); more pens cost 60, 150, 320 and 600 (5 pens at most) |
+| Growth | An animal is fully grown after **10 minutes**; only grown animals can be sold |
+| Animals (base price) | Chicken 10 (level 1), Pig 30 (level 2), Sheep 60 (level 4), Cow 120 (level 7) |
+| Selling | A grown animal sells for 60% of its price: a small amount |
+| Quota | To reach the next level you must sell a quota of animals, for example level 1: 2 chickens, level 2: 2 pigs, level 4: 3 chickens and 2 sheep. Only animals of the quota count |
+| Price tiers | Every 5 levels (5, 10, 15, ...) all prices rise by another 40% of the base price |
+| Lucky animal | The **first animal bought after a new price tier** (so at the raised price) is *lucky*: it grows twice as long (20 minutes) and sells for **twice** as much. It has a gold outline and a star |
+
+Animals only move in a straight line, back and forth inside their own place, at a constant speed; there are no sprites, only flat shapes.
+
+## Checklist
+
+Before you consider a widget done:
+
+- [ ] The folder name is final (it is the saved type), and `index.js` has `fields`, `summary` and `component`.
+- [ ] Language packs exist for **every** language, with `name`, `description` and a key for every field label (`npm test` checks the keys).
+- [ ] The root fills the box (`height: 100%`) and works in the dark theme (only theme variables, no fixed colours for text and backgrounds).
+- [ ] It looks right on a phone (`@media (max-width: 620px)`).
+- [ ] Timers and listeners are cleared in `onBeforeUnmount`.
+- [ ] Data from outside is shown as text; links are `http(s)` only and open with `rel="noopener"`.
+- [ ] Network data goes through `cached(...)`, and failures show a message instead of an empty box.
+- [ ] A test covers the logic (see [Testing](testing.md)).
+
+---
+
+**See also:** [API reference](api.md#widgets) · [Localization](localization.md) · [Architecture](architecture.md#widgets-and-lazy-loading)

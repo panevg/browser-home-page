@@ -1,5 +1,10 @@
-// Search engines. `%s` = encoded query, `%l` = base language of the interface (en, uk, ...).
-// The selected engine is saved as an index: append new engines at the END to keep existing choices.
+/**
+ * Search engines. In `url`, `%s` is replaced with the encoded query and `%l` with the base language of the interface
+ * (`en`, `uk`, ...). `host` is used to fetch the icon. Guide: docs/customization.md
+ *
+ * The selected engine is saved as an index, so append new engines at the END to keep existing choices.
+ * @type {import('@/types').Engine[]}
+ */
 export const ENGINES = [
 	{name: 'DuckDuckGo', host: 'duckduckgo.com', url: 'https://duckduckgo.com/?q=%s'},
 	{name: 'Google', host: 'google.com', url: 'https://www.google.com/search?q=%s'},

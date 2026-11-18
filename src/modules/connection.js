@@ -2,9 +2,26 @@
 // matches replies to requests, applies timeouts and reconnects. `WS` can be replaced in tests.
 import {LIMITS, parseMessage, dataMsg, requestMsg, replyMsg} from './protocol';
 
-// Statuses reported to handlers.onStatus(status, detail):
-//   connecting -> waiting (socket open, no ui yet) -> ready (first ui received) -> closed (will retry if enabled)
-//   failed: protocol violation or bad address, no automatic retry. detail: noUi | firstNotUi | protocol | ui | badUrl
+/**
+ * Creates the connection to one module server. Nothing happens until `connect()` is called.
+ *
+ * Statuses reported to `handlers.onStatus(status, detail)`:
+ *  - `connecting`, then `waiting` (socket open, no interface yet), then `ready` (the first `ui` arrived);
+ *  - `closed`: the connection ended; it is retried when `getOptions().reconnect` is on;
+ *  - `failed`: a protocol violation or a bad address, never retried. `detail` is `noUi`, `firstNotUi`, `protocol`, `ui` or `badUrl`.
+ *
+ * @param {object} config
+ * @param {string} config.url                    A `ws://` or `wss://` address.
+ * @param {() => {reconnect?: boolean, reconnectDelay?: number, requestTimeout?: number}} [config.getOptions]
+ *        Read whenever a setting is needed, so changes apply at once. Delays are in seconds.
+ * @param {{onStatus?: Function, onUi?: Function, onData?: Function, onRequest?: Function}} config.handlers
+ *        `onUi(msg)`, `onData(msg)` and `onRequest(msg)` receive validated messages.
+ * @param {typeof WebSocket} [config.WS]         The WebSocket class (replaced in tests).
+ * @returns {{connect: () => void, close: () => void, ready: boolean,
+ *            send: (id: string, data?: *) => boolean,
+ *            request: (id: string, data?: *) => Promise<*>,
+ *            reply: (rid: string, data?: *, error?: string) => void}}
+ */
 export function createConnection({url, getOptions, handlers, WS = globalThis.WebSocket}) {
 	let ws = null, timer = null, firstTimer = null, tries = 0, seq = 0;
 	let gotUi = false, stopped = true, fatal = false;

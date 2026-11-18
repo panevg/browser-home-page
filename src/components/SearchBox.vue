@@ -4,6 +4,8 @@ import {state} from '@/state';
 import {t, data} from '@/i18n';
 import {ENGINES} from '@/config/engines';
 import {icon, matchBookmarks} from '@/utils/misc';
+import {matchHistory} from '@/utils/history';
+import {forget, history, record} from '@/history';
 
 const q = ref(''), typed = ref(''), sugg = ref([]), sel = ref(-1), menu = ref(false), open = ref(false),
     input = ref(null);
@@ -11,11 +13,18 @@ const engine = computed(() => ENGINES[state.engine] || ENGINES[0]);
 const opts = computed(() => state.settings.search);
 let timer, ctl;
 
-// Dropdown rows: bookmarks that match the typed text come first, then the search suggestions.
+// Dropdown rows, in this order: matching bookmarks, then the search history, then the search suggestions.
+// History is matched locally and shown at once (it works offline); a suggestion that is already in the history is not repeated.
 const items = computed(() => {
   if (!open.value) return [];
   const bms = opts.value.bookmarkSuggestions ? matchBookmarks(state.bookmarks, typed.value, 3) : [];
-  return [...bms.map(b => ({bookmark: b, key: 'b' + b.id})), ...sugg.value.map(s => ({text: s, key: 's' + s}))];
+  const past = opts.value.history ? matchHistory(history, typed.value, 4) : [];
+  const seen = new Set(past.map(h => h.q.toLowerCase()));
+  return [
+    ...bms.map(b => ({bookmark: b, key: 'b' + b.id})),
+    ...past.map(h => ({text: h.q, history: true, key: 'h' + h.q})),
+    ...sugg.value.filter(s => !seen.has(s.toLowerCase())).map(s => ({text: s, key: 's' + s}))
+  ];
 });
 
 // DuckDuckGo autocomplete, debounced; a newer keystroke cancels the request in flight
@@ -62,9 +71,18 @@ function go(e) {
   if (it?.bookmark) return navigate(it.bookmark.url);
   const text = q.value.trim();
   if (!text) return;
-  navigate(opts.value.directUrls && /^https?:\/\//i.test(text)
-      ? text
-      : engine.value.url.replace('%l', data.lang.split('-')[0]).replace('%s', encodeURIComponent(text)));
+  const direct = opts.value.directUrls && /^https?:\/\//i.test(text);
+  if (!direct) record(text); // only real searches are remembered, never opened addresses
+  navigate(direct ? text : engine.value.url.replace('%l', data.lang.split('-')[0]).replace('%s', encodeURIComponent(text)));
+}
+
+// Shift+Delete removes the selected history row (the Firefox convention)
+function onDelete(e) {
+  const it = items.value[sel.value];
+  if (!e.shiftKey || !it?.history) return;
+  e.preventDefault();
+  forget(it.text);
+  sel.value = -1;
 }
 
 function pick(it) {
@@ -112,7 +130,7 @@ onUnmounted(() => {
       </button>
       <input
           ref="input" v-model="q" :placeholder="t('search') + ': ' + engine.name" autocomplete="off" spellcheck="false"
-          @input="onInput" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)" @keydown.enter="go"
+          @input="onInput" @keydown.down.prevent="move(1)" @keydown.up.prevent="move(-1)" @keydown.enter="go" @keydown.delete="onDelete"
       >
       <ul v-if="menu" class="menu engines">
         <li v-for="(e, i) in ENGINES" :key="e.name" :class="{ on: i === state.engine }" @click="pickEngine(i)"><img
@@ -120,7 +138,7 @@ onUnmounted(() => {
         </li>
       </ul>
       <ul v-if="items.length" class="menu">
-        <li v-for="(it, i) in items" :key="it.key" :class="{ on: i === sel, bm: !!it.bookmark }"
+        <li v-for="(it, i) in items" :key="it.key" :class="{ on: i === sel, bm: !!it.bookmark, hist: !!it.history }"
             @mousedown.prevent="pick(it)">
           <template v-if="it.bookmark">
             <img :src="icon(it.bookmark.host)" alt="">
@@ -128,6 +146,14 @@ onUnmounted(() => {
             <svg aria-hidden="true" class="bm-ic" viewBox="0 0 24 24">
               <path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-4.2L6 21V4.5Z"/>
             </svg>
+          </template>
+          <template v-else-if="it.history">
+            <svg aria-hidden="true" class="hist-ic" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="8.5"/>
+              <path d="M12 7.5V12l3 2"/>
+            </svg>
+            <span class="t">{{ it.text }}</span>
+            <button :aria-label="t('forget')" :title="t('forget')" class="hist-x" tabindex="-1" type="button" @mousedown.prevent.stop="forget(it.text)">×</button>
           </template>
           <template v-else>{{ it.text }}</template>
         </li>

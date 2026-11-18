@@ -1,5 +1,9 @@
 # Modules
 
+> Panels whose interface is sent by your own server over WebSocket: protocol, abstract UI, actions, security and how to extend the client.
+
+**On this page:** [Using modules](#using-modules) · [Protocol](#protocol-version-1) · [The abstract UI](#the-abstract-ui) · [Actions](#actions) · [Complete example](#complete-example) · [Security model](#security-model) · [Troubleshooting](#troubleshooting) · [Extending the client](#extending-the-client)
+
 A **module** is a panel on the page whose content is driven by *your own server* over a WebSocket. The page knows nothing
 about what the module does: the server sends an abstract description of a user interface (buttons, text, inputs, ...),
 the page draws it with its own fixed look, and user actions are sent back to the server.
@@ -238,3 +242,7 @@ All client code lives in `src/modules/` (no UI) and `src/components/Module*.vue`
 **Add a built-in request the server can make**: extend `onRequest()` in `runtime.js` and the table above.
 **Change a limit**: `LIMITS` in `protocol.js`. **Change the global settings**: see `src/config/settings.js`
 (`modules` group), the labels in `src/locales/*.js` and the rows in `SettingsModal.vue`.
+
+---
+
+**See also:** [API reference](api.md#module-protocol) · [Architecture](architecture.md#modules) · [`examples/module-server.mjs`](../examples/module-server.mjs)
